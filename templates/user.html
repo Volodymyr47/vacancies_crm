@@ -7,10 +7,13 @@
 {% block body %}
     <h1>User menu</h1>
     {% for element in menu %}
+        <a href="/">Homepage</a><br>
         <p>User name: {{element['name']}}</p>
         <p>Email: {{element['mail']}}</p>
         <p>Login: {{element['login']}}</p>
-        <a href="/user/documents">My documents</a><br>
-        <a href="/vacancies">My vacancies</a>
+        <h4><a href="/user/settings">Account settings</a><br><br></h4>
+
+        <h3><a href="/user/documents">My documents</a><br></h3>
+        <h3><a href="/vacancies">My vacancies</a></h3>
     {% endfor %}
 {% endblock %}
