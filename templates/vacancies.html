@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{title}}
+{%  endblock %}
+
+{% block body %}
+    {% for vacancy in vacancies %}
+        {% if vacancy['status'] == 1 %}
+            <ul>
+                <li><a href="/vacancy/{{ vacancy['id'] }}"><b>№: {{vacancy['id']}}</b></a></li>
+                <i>Created</i>: {{vacancy['creation_date']}}<br>
+                <i>Company</i>: {{vacancy['company']}}<br>
+                <i>Position</i>: {{vacancy['position_name']}}<br>
+                <i>Description</i>: {{vacancy['description']}}<br>
+                <i>Comment</i>: {{vacancy['comment']}}<br>
+            </ul>
+        {% endif %}
+    {% endfor %}
+{% endblock %}

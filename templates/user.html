@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {{title}}
+{% endblock %}
+
+{% block body %}
+    <h1>User menu</h1>
+    {% for element in menu %}
+        <p>User name: {{element['name']}}</p>
+        <p>Email: {{element['mail']}}</p>
+        <p>Login: {{element['login']}}</p>
+        <a href="/user/documents">My documents</a><br>
+        <a href="/vacancies">My vacancies</a>
+    {% endfor %}
+{% endblock %}
