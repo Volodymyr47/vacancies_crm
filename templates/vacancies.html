@@ -5,10 +5,10 @@
 {%  endblock %}
 
 {% block body %}
+    <a href="/">Homepage</a><br><br>
     {% for vacancy in vacancies %}
         {% if vacancy['status'] == 1 %}
             <ul>
-                <a href="/">Homepage</a><br><br>
                 <li><a href="/vacancy/{{ vacancy['id'] }}"><b>№: {{vacancy['id']}}</b></a></li>
                 <i>Created</i>: {{vacancy['creation_date']}}<br>
                 <i>Company</i>: {{vacancy['company']}}<br>

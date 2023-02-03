@@ -9,10 +9,12 @@
     {{data['status']}}<br>
     {{data['company']}}<br>
     {{data['position_name']}}<br>
-    {{data['description']}}<br>
+    {{data['description']}}<br><br>
+    <b>Contacts:</b>
     {% for contact in contacts %}<br>
         <ul>
             {{contact}}
         </ul>
     {% endfor %}
+    <h4><a href="/vacancy/{{data.id}}/history">History</a></h4>
 {% endblock %}

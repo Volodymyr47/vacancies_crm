@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}
+   {{title}}
+{% endblock %}
+
+{% block body %}
+    <h1>{{ title }}</h1>
+    <a href="/">Homepage</a><br>
+
+    {% if history %}
+        <ul>
+            {% for event in history['events'] %}
+            <li>
+                {{event}}
+            </li>
+            {% for conv in history['conversation'] %}
+            <li>
+                {{ conv }}
+            </li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No history found</p>
+    {% endif %}
+
+<h3><a href="/vacancies">My vacancies</a></h3>
+{% endblock %}

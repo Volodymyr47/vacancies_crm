@@ -2,18 +2,10 @@ from flask import Flask
 from flask import render_template
 
 import data
-from property import Contact
+from library import Contact, History
 
 
 app = Flask(__name__)
-
-
-def get_contacts(vacancy_id):
-    for specific_vacancy in data.vacancies:
-        if specific_vacancy['id'] == vacancy_id:
-            if specific_vacancy.get('contacts_ids', None):
-                return specific_vacancy['contacts_ids']
-    return "No contacts found"
 
 
 @app.route('/', methods=['GET'])
@@ -23,7 +15,7 @@ def home():
     Returns:
         Homepage greeting
     """
-    return render_template('home.html')
+    return render_template('home.html', title='Vacancies CRM')
 
 
 @app.route('/vacancies', methods=['GET', 'POST'])
@@ -90,11 +82,26 @@ def vacancy_event(vacancy_id, event_id):
 
 @app.route('/vacancy/<int:vacancy_id>/history', methods=['GET'])
 def vacancy_history(vacancy_id):
-    return f'History for specific vacancy with id {vacancy_id}'
+    """
+    Get vacancy's history
+    Args:
+        vacancy_id: int - specific vacancy's ID
+    Returns:
+        list - list of vacancy's history dictionaries
+    """
+    history = History(vacancy_id).get_history
+    return render_template('history.html',
+                           title=f'History of vacancy {vacancy_id}',
+                           history=history)
 
 
 @app.route('/user', methods=['GET'])
 def user_menu():
+    """
+    Get user's data
+    Returns:
+        list - list of user's data dictionary
+    """
     if data.user:
         return render_template('user.html', title='User menu', menu=data.user)
     return 'No user data'
