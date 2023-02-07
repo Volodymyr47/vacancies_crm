@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block body %}
+<h1>{{ title }}</h1>
+<p><a href="/">Homepage</a></p>
+    {% for field in specific_event %}
+        <p><i>Description</i>: {{ field['description'] }}</p>
+        <p><i>Event date</i>: {{ field['event_date'] }}</p>
+        <p><i>Due date</i>: {{ field['due_to_date'] }}</p>
+        <p><b>Contacts:</b></p>
+    {% endfor %}
+    <h4><a href="/vacancy/{{specific_event[0]['vacancy_id']}}">Back to vacancy</a></h4>
+
+
+{% endblock %}

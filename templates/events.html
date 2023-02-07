@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block body %}
+<h1>{{title}}</h1>
+<p><a href="/">Homepage</a></p>
+    {% for event in events %}
+        <p>Title: <a href="/vacancy/{{vacancy_id}}/event/{{event['id']}}">{{event['title']}}</a></p>
+        <p><i>Status</i>: {{event['status']}}</p>
+        <p><i>Event for vacancy</i> N <a href="/vacancy/{{ vacancy_id }}">{{event['vacancy_id']}}</a></p>
+    {% endfor %}
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <p style="color: red">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+<button onclick="show_event_form()">Add new event</button><br>
+<div id="event_form">
+    <form action="/vacancy/{{ vacancy_id }}/events" method="POST">
+        <p>*<input type="text" name="title" placeholder="Event title" required></p>
+        <p><textarea name="description" placeholder="Event description"></textarea></p>
+        <p><label for="due_to_date"></label>Due to date:
+            <input type="date" name="due_to_date" id="due_to_date"></p>
+        <p><input type="submit" value="Add event"></p>
+    </form>
+</div>
+<h4><a href="/vacancy/{{ vacancy_id }}">Back to vacancy</a></h4>
+<script>
+document.getElementById('event_form').style.display = 'none';
+
+function show_event_form() {
+    document.getElementById('event_form').style.display = 'block';
+    }
+</script>
+
+{% endblock %}

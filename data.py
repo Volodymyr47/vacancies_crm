@@ -1,3 +1,46 @@
+import sqlite3
+
+
+class VacancyDataBase:
+    def __init__(self, db_name):
+        self.db_name = db_name
+
+    def make_connection(self):
+        try:
+            connection = sqlite3.Connection(self.db_name)
+            return connection
+        except ConnectionError as connection_err:
+            raise connection_err
+
+    def select(self, table_name, condition=None, order_by=None):
+        conn = self.make_connection()
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+        query = 'select * from ' + table_name
+
+        if condition:
+            query = query + ' where ' + condition
+        if order_by:
+            query = query + ' order by ' + order_by
+
+        cursor.execute(query)
+        result = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return result
+
+    def insert(self, table_name, data):
+        conn = self.make_connection()
+        columns = ', '.join(data.keys())
+        placeholders = ':' + ', :'.join(data.keys())
+        query = 'insert into %s(%s) values(%s)' % (table_name, columns, placeholders)
+        cursor = conn.cursor()
+        cursor.execute(query, data)
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+
 vacancies = [
     {
         "id": 1,
@@ -44,7 +87,7 @@ events = [
         "due_to_date": "05.02.2023",
         "status": 1
     },
-{
+    {
         "id": 2,
         "vacancy_id": 1,
         "description": "Event description",
@@ -53,7 +96,7 @@ events = [
         "due_to_date": "27.01.2023",
         "status": 1
     },
-{
+    {
         "id": 3,
         "vacancy_id": 2,
         "description": "Event 3 Test task",
@@ -94,7 +137,7 @@ contacts = [
         "phone": "0961472558",
         "mail": "spec@softserveinc.com"
     },
-{
+    {
         "id": 3,
         "name": "EPAM HR",
         "phone": "0970123456",

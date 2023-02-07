@@ -2,7 +2,7 @@ import data
 
 
 class Contact:
-    def __init__(self, vacancy_id):
+    def __init__(self, vacancy_id=None):
         self.vacancy_id = vacancy_id
 
     @property
@@ -30,6 +30,7 @@ class Contact:
 class History:
     def __init__(self, vacancy_id):
         self.vacancy_id = vacancy_id
+
     @property
     def get_history(self):
         events = []

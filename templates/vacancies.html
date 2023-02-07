@@ -5,17 +5,49 @@
 {%  endblock %}
 
 {% block body %}
-    <a href="/">Homepage</a><br><br>
-    {% for vacancy in vacancies %}
-        {% if vacancy['status'] == 1 %}
+<h1>{{title}}</h1>
+    <p><a href="/">Homepage</a></p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <p style="color: red">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <p><button onclick="show_vacancy_form()">Add new vacancy</button></p>
+
+    <div id="vacancy_form">
+        <form action="/vacancies" method="POST">
+            <p>*<input type="text" name="position_name" placeholder="Position name" required></p>
+            <p>*<input type="text" name="company" placeholder="Company name" required></p>
+            <p>*<textarea name="description" placeholder="Description" required></textarea></p>
+            <select name="contacts">
+               <option name="phone">Phone:</option>
+               <option name="email">Email: </option>
+                 <input type="text" name="phone">
+            <p></select></p>
+            <p><textarea name="comment" placeholder="Your comment"></textarea></p>
+            <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy"></p>
+        </form>
+    </div>
+    <div>
+        {% for vacancy in vacancies %}
             <ul>
-                <li><a href="/vacancy/{{ vacancy['id'] }}"><b>№: {{vacancy['id']}}</b></a></li>
+                <li><a href="/vacancy/{{ vacancy['id'] }}"><b>Look at vacancy №: {{vacancy['id']}}</b></a></li>
                 <i>Created</i>: {{vacancy['creation_date']}}<br>
                 <i>Company</i>: {{vacancy['company']}}<br>
                 <i>Position</i>: {{vacancy['position_name']}}<br>
-                <i>Description</i>: {{vacancy['description']}}<br>
-                <i>Comment</i>: {{vacancy['comment']}}<br>
             </ul>
-        {% endif %}
-    {% endfor %}
+        {% endfor %}
+    </div>
+
+
+    <script>
+    document.getElementById('vacancy_form').style.display = 'none';
+
+    function show_vacancy_form() {
+      document.getElementById('vacancy_form').style.display = 'block';
+
+    }
+    </script>
 {% endblock %}
