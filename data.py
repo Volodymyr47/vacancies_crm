@@ -62,10 +62,6 @@ data = {
     }
 
 
-with VacancyDataBase('vacancies.db') as db:
-    db.update('vacancy', data, condition='id = 2')
-
-
 vacancies = [
     {
         "id": 1,
