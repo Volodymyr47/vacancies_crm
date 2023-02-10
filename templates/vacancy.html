@@ -10,6 +10,11 @@
     {% for field in specific_vacancy %}
         <p><i>Created</i>: {{field['creation_date']}}</p>
         <p><i>Status</i>: {{field['status']}}</p>
+
+        {% if field['url'] %}
+            <p><i>Vacancy URL</i>: {{field['url']}}</p>
+        {% endif %}
+
         <p><i>Company</i>: {{field['company']}}</p>
         <p><i>Description</i>: {{field['description']}}</p>
         <p><b>Contacts:</b></p>
@@ -19,8 +24,50 @@
             </ul>
         {% endfor %}
     {% endfor %}
+
+<p><button id="edit_button" onclick="show_vacancy_edit_form()">Edit</button></p>
+<div id="vacancy_edit">
+  <form action="" method="POST">
+    <p><label for="posname">*Position name:</label><br>
+    <input type="text" id="posname" name="position_name" value="{{specific_vacancy[0]['position_name']}}" required></p>
+
+    <p><label for="company">*Company:</label><br>
+    <input type="text" id="company" name="company" value="{{specific_vacancy[0]['company']}}" required></p>
+
+    <p><label for="desc">*Description:</label><br>
+    <textarea name="description" id="desc" required>{{specific_vacancy[0]['description']}}</textarea></p>
+
+    <p><label for="contacts">Contacts:</label><br>
+    <select name="contacts" id="contacts">
+      <option name="phone">Phone:</option>
+      <option name="email">Email: </option>
+        <input type="text" name="phone">
+    </select></p>
+
+    <p><label for="comment">Comment:</label><br>
+    <textarea name="comment" id="comment" required>{{specific_vacancy[0]['comment']}}</textarea></p>
+
+    <p><label for="url">URL:</label><br>
+    <input type="text" name="url" id="url" value="{{specific_vacancy[0]['url']}}"></p>
+
+    <p><label for="status">Status:</label><br>
+    <input type="number" name="status" id="status" value="{{specific_vacancy[0]['status']}}"></p>
+
+    <p><input type="submit" name="save_vacancy" value="Save vacancy"></p>
+ </form>
+</div>
+
     <h4><a href="/vacancy/{{specific_vacancy[0]['id']}}/events">Events</a></h4>
     <h4><a href="/vacancy/{{specific_vacancy[0]['id']}}/history">History</a></h4>
     <h4><a href="/vacancies">Back to all vacancies</a></h4>
+
+<script>
+    document.getElementById('vacancy_edit').style.display = 'none';
+
+    function show_vacancy_edit_form() {
+      document.getElementById('vacancy_edit').style.display = 'block';
+      document.getElementById('edit_button').style.display = 'none'
+    }
+</script>
 
 {% endblock %}

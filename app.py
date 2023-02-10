@@ -1,5 +1,6 @@
 from flask import Flask, flash
 from flask import render_template, request, redirect, url_for
+
 from datetime import datetime
 
 import data
@@ -27,7 +28,6 @@ def vacancies():
     Returns:
         list - list of dictionaries of vacancies
     """
-    db = VacancyDataBase('vacancies.db')
     if request.method == 'POST':
         if request.form.get('position_name', '').strip() == '':
             flash('Field "Position name" must be populated', category='danger')
@@ -44,6 +44,7 @@ def vacancies():
         description = request.form.get('description')
         contacts = '4, 5, 6'
         comment = request.form.get('comment')
+        url = request.form.get('url')
         creation_date = datetime.now().strftime('%Y-%m-%d %H:%m')
         vacancy_data = {
                         'position_name': position_name,
@@ -53,18 +54,20 @@ def vacancies():
                         'creation_date': creation_date,
                         'comment': comment,
                         'status': 1,
-                        'user_id': 1
+                        'user_id': 1,
+                        'url': url
                         }
-        db.insert('vacancy', vacancy_data)
+        with VacancyDataBase('vacancies.db') as db:
+            db.insert('vacancy', vacancy_data)
+    with VacancyDataBase('vacancies.db') as db:
+        all_vacancies = db.select('vacancy',
+                                  order_by='id desc')
+    return render_template('vacancies.html',
+                           title='All vacancies',
+                           vacancies=all_vacancies)
 
-    all_vacancies = db.select(table_name='vacancy', order_by='id desc')
-    if all_vacancies:
-        return render_template('vacancies.html', vacancies=all_vacancies, title='All vacancies')
-    else:
-        return render_template('404.html', code=404)
 
-
-@app.route('/vacancy/<int:vacancy_id>', methods=['GET', 'PUT'])
+@app.route('/vacancy/<int:vacancy_id>', methods=['GET', 'POST'])
 def vacancy(vacancy_id):
     """
     Show/Edit specific vacancy by ID
@@ -74,19 +77,44 @@ def vacancy(vacancy_id):
         dict - data of specific vacancy
     """
     contact = Contact(vacancy_id)
-    db = VacancyDataBase('vacancies.db')
 
-    if request.method == 'PUT':
-        pass
+    if request.method == 'POST':
+        if request.form.get('position_name', '').strip() == '':
+            flash('Field "Position name" must be populated', category='danger')
+            return redirect(url_for('vacancies'))
+        if request.form.get('company', '').strip() == '':
+            flash('Field "Company" must be populated', category='danger')
+            return redirect(url_for('vacancies'))
+        if request.form.get('description', '').strip() == '':
+            flash('Field "Description" must be populated', category='danger')
+            return redirect(url_for('vacancies'))
 
-    specific_vacancy = db.select('vacancy', condition=f'id = {vacancy_id}')
-    if specific_vacancy:
-        return render_template('vacancy.html',
-                               title=specific_vacancy[0]["position_name"],
-                               specific_vacancy=specific_vacancy,
-                               contacts=contact.get_contacts)
-    else:
-        return render_template('404.html', code=404)
+        position_name = request.form.get('position_name')
+        company = request.form.get('company')
+        description = request.form.get('description')
+        contacts = '4, 5, 6'
+        comment = request.form.get('comment')
+        url = request.form.get('url')
+        status = request.form.get('status')
+        upd_vacancy_data = {
+            'position_name': position_name,
+            'company': company,
+            'description': description,
+            'contacts_ids': contacts,
+            'comment': comment,
+            'url': url,
+            'status': status
+        }
+        with VacancyDataBase('vacancies.db') as db:
+            db.update('vacancy', upd_vacancy_data, condition=f'id = {vacancy_id}')
+
+    with VacancyDataBase('vacancies.db') as db:
+        specific_vacancy = db.select('vacancy',
+                                     condition=f'id = {vacancy_id}')
+    return render_template('vacancy.html',
+                           title=specific_vacancy[0]["position_name"],
+                           specific_vacancy=specific_vacancy,
+                           contacts=contact.get_contacts)
 
 
 @app.route('/vacancy/<int:vacancy_id>/events', methods=['GET', 'POST'])
@@ -98,7 +126,6 @@ def vacancy_events(vacancy_id):
     Returns:
         list - list of events
     """
-    db = VacancyDataBase('vacancies.db')
     if request.method == 'POST':
         if request.form.get('title', '').strip() == '':
             flash('Field "Title" must be populated', category='danger')
@@ -110,16 +137,20 @@ def vacancy_events(vacancy_id):
                     'due_to_date': request.form.get('due_to_date'),
                     'status': 1
                     }
-        print(new_event)
-        db.insert('event', new_event)
-    events = db.select('event', condition=f'vacancy_id={vacancy_id}', order_by='event_date desc')
+        with VacancyDataBase('vacancies.db') as db:
+            db.insert('event', new_event)
+    with VacancyDataBase('vacancies.db') as db:
+        events = db.select('event',
+                           condition=f'vacancy_id={vacancy_id}',
+                           order_by='event_date desc')
+        vacancy_name = db.select('vacancy', condition=f'id = {vacancy_id}')[0]['position_name']
     return render_template('events.html',
                            vacancy_id=vacancy_id,
-                           title=f'Events of vacancy {vacancy_id}',
+                           title=vacancy_name,
                            events=events)
 
 
-@app.route('/vacancy/<int:vacancy_id>/event/<int:event_id>', methods=['GET', 'PUT'])
+@app.route('/vacancy/<int:vacancy_id>/event/<int:event_id>', methods=['GET', 'POST'])
 def vacancy_event(vacancy_id, event_id):
     """
     Show/Edit specific event of specific vacancy
@@ -129,14 +160,34 @@ def vacancy_event(vacancy_id, event_id):
     Returns:
         dict - dictionary of event's data
     """
-    db = VacancyDataBase('vacancies.db')
-    specific_event = db.select('event', condition=f'vacancy_id = {vacancy_id} and id = {event_id}')
-    if specific_event:
-        return render_template('event.html',
-                               title = specific_event[0]['title'],
-                               specific_event=specific_event)
-    else:
-        return render_template('404.html', code=404)
+    if request.method == 'POST':
+        if request.form.get('title', '').strip() == '':
+            flash('Field "Title" must be populated', category='danger')
+        if request.form.get('status', '').strip() == '':
+            flash('Field "Status" must be populated', category='danger')
+
+        title = request.form.get('title')
+        description = request.form.get('description')
+        due_to_date = request.form.get('due_to_date')
+        status = request.form.get('status')
+        upd_event_data = {
+            'title': title,
+            'description': description,
+            'due_to_date': due_to_date,
+            'status': status
+        }
+
+        with VacancyDataBase('vacancies.db') as db:
+            db.update('event',
+                      dataset=upd_event_data,
+                      condition=f'id = {event_id} and vacancy_id = {vacancy_id}')
+
+    with VacancyDataBase('vacancies.db') as db:
+        specific_event = db.select('event',
+                                   condition=f'vacancy_id = {vacancy_id} and id = {event_id}')
+    return render_template('event.html',
+                           title = specific_event[0]['title'],
+                           specific_event=specific_event)
 
 
 @app.route('/vacancy/<int:vacancy_id>/history', methods=['GET'])
@@ -161,9 +212,16 @@ def user_menu():
     Returns:
         list - list of user's data dictionary
     """
-    if data.user:
-        return render_template('user.html', title='User menu', menu=data.user)
-    return 'No user data'
+    with VacancyDataBase('vacancies.db') as db:
+        user_data = db.select('user')
+        documents = db.select('document')
+        templates = db.select('templates')
+
+    return render_template('user.html',
+                           title='User menu',
+                           user_data=user_data,
+                           documents=documents,
+                           templates=templates)
 
 
 @app.route('/user/calendar', methods=['GET'])
@@ -176,17 +234,60 @@ def user_mail():
     return 'User mail'
 
 
-@app.route('/user/settings', methods=['GET', 'PUT'])
+@app.route('/user/settings', methods=['GET', 'POST'])
 def user_settings():
-    return 'User settings'
+
+    if request.method == 'POST':
+        if request.form.get('user_name', '').strip() == '':
+            flash('Field "Name" must be populated', category='danger')
+        if request.form.get('login', '').strip() == '':
+            flash('Field "Login" must be populated', category='danger')
+        if request.form.get('passwd', '').strip() == '':
+            flash('Field "Password" must be populated', category='danger')
+        if request.form.get('email', '').strip() == '':
+            flash('Field "Email" must be populated', category='danger')
+
+        user_name = request.form.get('user_name')
+        login = request.form.get('login')
+        passwd = request.form.get('passwd')
+        email = request.form.get('email')
+
+        # if request.form.get('photo'):
+        #     photo = request.form.get('photo')
+        #     photo_name = 'user_photo'
+        #     description = 'photo_description'
+        # cv = request.form.get('CV')
+        # template = request.form.get('template')
+
+        user_data = {
+            'name': user_name,
+            'login': login,
+            'passwd': passwd,
+            'email': email
+        }
+        with VacancyDataBase('vacancies.db') as db:
+            db.update('user',
+                      dataset=user_data,
+                      condition='id = 1')
+
+    with VacancyDataBase('vacancies.db') as db:
+        user_data = db.select('user')
+        documents = db.select('document')
+        templates = db.select('templates')
+
+    return render_template('user-settings.html',
+                           title='User menu',
+                           user_data=user_data,
+                           documents=documents,
+                           templates=templates)
 
 
-@app.route('/user/documents', methods=['GET', 'POST', 'PUT'])
+@app.route('/user/documents', methods=['GET', 'POST'])
 def user_documents():
     return data.documents
 
 
-@app.route('/user/templates', methods=['GET', 'POST', 'PUT'])
+@app.route('/user/templates', methods=['GET', 'POST'])
 def user_templates():
     return 'User templates'
 

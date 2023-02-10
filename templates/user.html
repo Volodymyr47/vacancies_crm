@@ -6,13 +6,34 @@
 
 {% block body %}
     <h1>User menu</h1>
-    {% for element in menu %}
-        <a href="/">Homepage</a><br>
-        <p>User name: {{element['name']}}</p>
-        <p>Email: {{element['mail']}}</p>
-        <p>Login: {{element['login']}}</p>
-
-        <h3><a href="/user/documents">My documents</a><br></h3>
-        <h3><a href="/vacancies">My vacancies</a></h3>
+    <h3><a href="/">Homepage</a></h3>
+    <h3><a href="/user/settings">Edit user data</a><br></h3>
+    <h3><a href="/vacancies">My vacancies</a></h3>
+<h4>User info</h4>
+    {% for field in user_data %}
+        <p>User name: {{field['name']}}</p>
+        <p>Email: {{field['email']}}</p>
+        <p>Login: {{field['login']}}</p>
     {% endfor %}
+
+<h4>Documents</h4>
+    {% for document in documents %}
+
+        <p>{% if document['name'] == 'photo' %}
+            <img src="{{ url_for('static', filename=document['content']) }}" alt="Photo" height="300" width="300">
+            <p>Description: {{document['description']}}</p>
+        {% endif %}</p>
+
+        <p>{% if document['name'] == 'cv' %}
+            <p>Attached CV: <a href="{{ url_for('static', filename=document['content']) }}">{{document['content']}}</a></p>
+            <p>Description: {{document['description']}}</p>
+        {% endif %}</p>
+    {% endfor %}
+
+<h4>Templates</h4>
+    {% for template in templates %}
+        <p>Name: {{template['name']}}</p>
+        <p>Content: {{template['content']}}</p>
+    {% endfor %}
+
 {% endblock %}

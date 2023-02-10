@@ -5,12 +5,11 @@
 {% endblock %}
 
 {% block body %}
-<h1>{{title}}</h1>
+<h1>Events for vacancy <a href="/vacancy/{{ vacancy_id }}">{{title}}</a></h1>
 <p><a href="/">Homepage</a></p>
     {% for event in events %}
         <p>Title: <a href="/vacancy/{{vacancy_id}}/event/{{event['id']}}">{{event['title']}}</a></p>
         <p><i>Status</i>: {{event['status']}}</p>
-        <p><i>Event for vacancy</i> N <a href="/vacancy/{{ vacancy_id }}">{{event['vacancy_id']}}</a></p>
     {% endfor %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -31,13 +30,13 @@
         <p><input type="submit" value="Add event"></p>
     </form>
 </div>
-<h4><a href="/vacancy/{{ vacancy_id }}">Back to vacancy</a></h4>
-<script>
-document.getElementById('event_form').style.display = 'none';
 
-function show_event_form() {
-    document.getElementById('event_form').style.display = 'block';
-    }
+<script>
+    document.getElementById('event_form').style.display = 'none';
+
+    function show_event_form() {
+        document.getElementById('event_form').style.display = 'block';
+        }
 </script>
 
 {% endblock %}

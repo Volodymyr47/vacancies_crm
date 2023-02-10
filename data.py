@@ -5,40 +5,65 @@ class VacancyDataBase:
     def __init__(self, db_name):
         self.db_name = db_name
 
-    def make_connection(self):
+    def __enter__(self):
         try:
-            connection = sqlite3.Connection(self.db_name)
-            return connection
+            self.connection = sqlite3.Connection(self.db_name)
+            self.cursor = self.connection.cursor()
+            self.cursor.row_factory = sqlite3.Row
+            return self
         except ConnectionError as connection_err:
             raise connection_err
+        except Exception as err:
+            raise err
 
-    def select(self, table_name, condition=None, order_by=None):
-        conn = self.make_connection()
-        conn.row_factory = sqlite3.Row
-        cursor = conn.cursor()
+    def select(self, table_name, join=None, condition=None, order_by=None):
         query = 'select * from ' + table_name
-
+        if join:
+            query = query + join
         if condition:
             query = query + ' where ' + condition
         if order_by:
             query = query + ' order by ' + order_by
-
-        cursor.execute(query)
-        result = cursor.fetchall()
-        cursor.close()
-        conn.close()
+        self.cursor.execute(query)
+        result = self.cursor.fetchall()
         return result
 
-    def insert(self, table_name, data):
-        conn = self.make_connection()
-        columns = ', '.join(data.keys())
-        placeholders = ':' + ', :'.join(data.keys())
+    def insert(self, table_name, dataset):
+        columns = ', '.join(dataset.keys())
+        placeholders = ':' + ', :'.join(dataset.keys())
         query = 'insert into %s(%s) values(%s)' % (table_name, columns, placeholders)
-        cursor = conn.cursor()
-        cursor.execute(query, data)
-        conn.commit()
-        cursor.close()
-        conn.close()
+        self.cursor.execute(query, dataset)
+        self.connection.commit()
+
+    def update(self, table_name, dataset, condition=None):
+        set_fields = ''
+        for key in dataset:
+            set_fields = set_fields + f'{key} = "{dataset.get(key)}", '
+        set_fields = set_fields.rstrip(', ')
+        query = f'update {table_name}' \
+                f' set {set_fields}'
+        if condition:
+            query = query + f' where {condition}'
+
+        self.cursor.execute(query)
+        self.connection.commit()
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.cursor.close()
+        self.connection.close()
+
+data = {
+        "status": 1,
+        "company": "EPAM",
+        "contacts_ids": [3, 4],
+        "description": "My vacancy description",
+        "position_name": "Jonior Python developer",
+        "comment": "No response"
+    }
+
+
+with VacancyDataBase('vacancies.db') as db:
+    db.update('vacancy', data, condition='id = 2')
 
 
 vacancies = [

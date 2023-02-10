@@ -11,9 +11,38 @@
         <p><i>Description</i>: {{ field['description'] }}</p>
         <p><i>Event date</i>: {{ field['event_date'] }}</p>
         <p><i>Due date</i>: {{ field['due_to_date'] }}</p>
-        <p><b>Contacts:</b></p>
-    {% endfor %}
-    <h4><a href="/vacancy/{{specific_event[0]['vacancy_id']}}">Back to vacancy</a></h4>
 
+    {% endfor %}
+
+<p><button id="edit_button" onclick="show_event_edit_form()">Edit</button></p>
+<div id="event_edit">
+
+    <form action="" method="POST">
+        <p><label for="title">*Title:</label><br>
+        <input type="text" name="title" id="title" value="{{specific_event[0]['title']}}" required></p>
+
+        <p><label for="desc">Description:</label><br>
+        <textarea name="description" id="desc">{{specific_event[0]['description']}}</textarea></p>
+
+        <p><label for="due_date">Due to date:</label><br>
+        <input type="date" name="due_to_date" id="due_date" value="{{specific_event[0]['due_to_date']}}"></p>
+
+        <p><label for="status">*Status:</label><br>
+        <input type="number" name="status" id="status" value="{{specific_event[0]['status']}}" required></p>
+
+        <p><input type="submit" name="save_event" value="Save event"></p>
+    </form>
+</div>
+
+    <h4><a href="/vacancy/{{specific_event[0]['vacancy_id']}}/events">Back to events</a></h4>
+
+<script>
+    document.getElementById('event_edit').style.display = 'none';
+
+    function show_event_edit_form() {
+      document.getElementById('event_edit').style.display = 'block';
+      document.getElementById('edit_button').style.display = 'none'
+    }
+</script>
 
 {% endblock %}

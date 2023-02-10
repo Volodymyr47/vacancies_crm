@@ -14,7 +14,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <p><button onclick="show_vacancy_form()">Add new vacancy</button></p>
+    <p><button onclick="show_vacancy_form()" id="new_vacancy_button">Add new vacancy</button></p>
 
     <div id="vacancy_form">
         <form action="/vacancies" method="POST">
@@ -27,6 +27,7 @@
                  <input type="text" name="phone">
             <p></select></p>
             <p><textarea name="comment" placeholder="Your comment"></textarea></p>
+            <p><input type="text" name="url" placeholder="Vacancy URL"></p>
             <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy"></p>
         </form>
     </div>
@@ -47,7 +48,7 @@
 
     function show_vacancy_form() {
       document.getElementById('vacancy_form').style.display = 'block';
-
+      document.getElementById('new_vacancy_button').style.display = 'none';
     }
     </script>
 {% endblock %}
