@@ -7,65 +7,76 @@
 
 {% block body %}
     <h1>Edit user data</h1>
-    <h3><a href="/user">Cancel</a><br></h3>
 
 <h4>User info</h4>
 <form action="" method="POST" name="user_form">
-    {% for field in user_data %}
-        {% if field %}
-            <p><label for="name">*Name:</label>
-            <input type="text" id="name" name="user_name" value="{{field['name']}}" required></p>
+    <p><label for="name">*Name:</label>
+    <input type="text" id="name" name="user_name" value="{{ user_data.name }}" required></p>
 
-            <p><label for="email">*Email:</label>
-            <input type="email" id="email" name="email" value="{{field['email']}}" required></p>
+    <p><label for="email">*Email:</label>
+    <input type="email" id="email" name="email" value="{{ user_data.email }}" required></p>
 
-            <p><label for="login">*Login:</label>
-            <input type="text" id="login" name="login" value="{{field['login']}}" required></p>
+    <p><label for="login">*Login:</label>
+    <input type="text" id="login" name="login" value="{{ user_data.login }}" required></p>
 
-            <p><label for="passwd">*Password:</label>
-            <input type="password" id="passwd" name="passwd" value="{{field['passwd']}}" required></p>
-      {% endif %}
-    {% endfor %}
-    <input type="submit" name="submit" value="User save"></p>
-</form>
+    <p><label for="passwd">*Password:</label>
+    <input type="password" id="passwd" name="passwd" value="{{ user_data.passwd }}" required></p>
+
+    <h4>Email credentials</h4>
+
+    {% if email_cred %}
+        <p><label for="email_login">*Email Login:</label>
+        <input type="text" id="email_login" name="email_login" value="{{ email_cred.email_login }}" required></p>
+
+        <p><label for="email_passwd">*Password:</label>
+        <input type="password" id="email_passwd" name="email_passwd" value="{{ email_cred.email_passwd }}" required></p>
+
+        <p><label for="pop">*POP-server:</label>
+        <input type="text" id="pop" name="pop_server" value="{{ email_cred.pop_server }}" required></p>
+
+        <p><label for="smtp">*SMTP-server:</label>
+        <input type="text" id="smtp" name="smtp_server" value="{{ email_cred.smtp_server }}" required></p>
+
+    {% else %}
+        <p><label for="new_email_login">*Email Login:</label>
+        <input type="text" id="new_email_login" name="email_login" required></p>
+
+        <p><label for="new_email_passwd">*Email Password:</label>
+        <input type="password" id="new_email_passwd" name="email_passwd" required></p>
+
+        <p><label for="new_pop">*POP-server:</label>
+        <input type="text" id="new_pop" name="pop_server" required></p>
+
+        <p><label for="new_smtp">*SMTP-server:</label>
+        <input type="text" id="new_smtp" name="smtp_server" required></p>
+    {% endif %}
 
     <h4>Documents</h4>
-    {% for document in documents %}
-        <p>{% if document['name'] == 'photo' %}
-            <img src="{{ url_for('static', filename=document['content']) }}" alt="Photo" height="300" width="300">
-        {% endif %}</p>
 
-         <p>{% if document['name'] == 'cv' %}
-            <a href="{{ url_for('static', filename=document['content']) }}">{{document['content']}}</a>
-        {% endif %}</p>
+    {% for document in documents %}
+         <p>
+            <a href="{{ url_for('static', filename=document.content) }}" target="_blank">{{ document.content }}</a>
+         </p>
     {% endfor %}
 
-<form action="" method="POST" name="document_form">
-    <p><label for="photo_type">*Specify the document type:</label>
-        <select name="doc_type" id="photo_type">
-            <option value="cv">CV</option>
-            <option value="photo">Photo</option>
-        </select></p>
-    <p><label for="add_photo">*Choose your document:</label>
-    <input type="file" id="add_photo" name="photo"></p>
-    <p><label for="photo_desc">Add photo descirption:</label>
-    <textarea name="photo_description" id="photo_desc" cols="30" rows="5"></textarea></p><br>
-    <input type="submit" name="submit" value="Documents save"></p>
-</form>
+    <p><label for="add_document">*Choose your document:</label>
+    <input type="file" id="add_document" name="document"></p>
+    <textarea name="doc_description" cols="30" rows="5"></textarea><br>
 
 <h4>Templates</h4>
 
     {% for template in templates %}
-         <p>{% if template['content']%}
-            <a href="{{ url_for('static', filename=template['content']) }}">{{template['content']}}</a>
+         <p>{% if template.content %}
+            <a href="{{ url_for('static', filename=template.content) }}">{{ template.content }}</a>
         {% endif %}</p>
     {% endfor %}
 
-<form action="" method="POST" name="template_form">
     <p><label for="add_tpl">Add templates:</label>
     <input type="file" id="add_tpl" name="template"></p>
 
-    <input type="submit" name="submit" value="Templates save"></p>
+    <input type="submit" name="submit" value=" Save ">
+    <a href="/user">Cancel</a><br>
 </form>
+
 
 {% endblock %}

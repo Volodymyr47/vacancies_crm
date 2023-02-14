@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {{title}}
+    Event's of {{title}}
 {% endblock %}
 
 {% block body %}
 <h1>Events for vacancy <a href="/vacancy/{{ vacancy_id }}">{{title}}</a></h1>
 <p><a href="/">Homepage</a></p>
     {% for event in events %}
-        <p>Title: <a href="/vacancy/{{vacancy_id}}/event/{{event['id']}}">{{event['title']}}</a></p>
-        <p><i>Status</i>: {{event['status']}}</p>
+        <p>Title: <a href="/vacancy/{{vacancy_id}}/event/{{event.id}}">{{event.title}}</a></p>
+        <p><i>Status</i>: {{event.status}}</p>
     {% endfor %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -20,7 +20,7 @@
         {% endif %}
     {% endwith %}
 
-<button onclick="show_event_form()">Add new event</button><br>
+<button id="new_event_button" onclick="show_event_form()">Add new event</button><br>
 <div id="event_form">
     <form action="/vacancy/{{ vacancy_id }}/events" method="POST">
         <p>*<input type="text" name="title" placeholder="Event title" required></p>
@@ -36,6 +36,7 @@
 
     function show_event_form() {
         document.getElementById('event_form').style.display = 'block';
+        document.getElementById('new_event_button').style.display = 'none';
         }
 </script>
 

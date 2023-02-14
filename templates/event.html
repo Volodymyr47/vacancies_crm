@@ -1,40 +1,38 @@
 {% extends 'base.html' %}
 
 {% block title %}
-    {{title}}
+    {{ specific_event.title }}
 {% endblock %}
 
 {% block body %}
-<h1>{{ title }}</h1>
+<h1>{{ specific_event.title }}</h1>
 <p><a href="/">Homepage</a></p>
-    {% for field in specific_event %}
-        <p><i>Description</i>: {{ field['description'] }}</p>
-        <p><i>Event date</i>: {{ field['event_date'] }}</p>
-        <p><i>Due date</i>: {{ field['due_to_date'] }}</p>
+<p><i>Description</i>: {{ specific_event.description }}</p>
+<p><i>Event date</i>: {{ specific_event.event_date }}</p>
+<p><i>Due date</i>: {{ specific_event.due_to_date }}</p>
 
-    {% endfor %}
 
 <p><button id="edit_button" onclick="show_event_edit_form()">Edit</button></p>
 <div id="event_edit">
 
     <form action="" method="POST">
         <p><label for="title">*Title:</label><br>
-        <input type="text" name="title" id="title" value="{{specific_event[0]['title']}}" required></p>
+        <input type="text" name="title" id="title" value="{{ specific_event.title }}" required></p>
 
         <p><label for="desc">Description:</label><br>
-        <textarea name="description" id="desc">{{specific_event[0]['description']}}</textarea></p>
+        <textarea name="description" id="desc">{{specific_event.description }}</textarea></p>
 
         <p><label for="due_date">Due to date:</label><br>
-        <input type="date" name="due_to_date" id="due_date" value="{{specific_event[0]['due_to_date']}}"></p>
+        <input type="date" name="due_to_date" id="due_date" value="{{ specific_event.due_to_date }}"></p>
 
         <p><label for="status">*Status:</label><br>
-        <input type="number" name="status" id="status" value="{{specific_event[0]['status']}}" required></p>
+        <input type="number" name="status" id="status" value="{{ specific_event.status }}" required></p>
 
         <p><input type="submit" name="save_event" value="Save event"></p>
     </form>
 </div>
 
-    <h4><a href="/vacancy/{{specific_event[0]['vacancy_id']}}/events">Back to events</a></h4>
+    <h4><a href="/vacancy/{{specific_event.vacancy_id }}/events">Back to events</a></h4>
 
 <script>
     document.getElementById('event_edit').style.display = 'none';

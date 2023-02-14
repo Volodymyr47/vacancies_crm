@@ -7,33 +7,35 @@
 {% block body %}
     <h1>User menu</h1>
     <h3><a href="/">Homepage</a></h3>
-    <h3><a href="/user/settings">Edit user data</a><br></h3>
-    <h3><a href="/vacancies">My vacancies</a></h3>
+    <h3><a href="/vacancies">My vacancies</a></h3><br>
+
 <h4>User info</h4>
-    {% for field in user_data %}
-        <p>User name: {{field['name']}}</p>
-        <p>Email: {{field['email']}}</p>
-        <p>Login: {{field['login']}}</p>
-    {% endfor %}
+
+<p>User name: {{ user_data.name }}</p>
+<p>Email: {{ user_data.email }}</p>
+<p>Login: {{ user_data.login }}</p>
+
 
 <h4>Documents</h4>
     {% for document in documents %}
 
-        <p>{% if document['name'] == 'photo' %}
-            <img src="{{ url_for('static', filename=document['content']) }}" alt="Photo" height="300" width="300">
-            <p>Description: {{document['description']}}</p>
+        <p>{% if document.name == 'photo' %}
+            <img src="{{ url_for('static', filename=document.content) }}" alt="Photo" height="300" width="300">
+            <p>Description: {{ document.description }}</p>
         {% endif %}</p>
 
-        <p>{% if document['name'] == 'cv' %}
-            <p>Attached CV: <a href="{{ url_for('static', filename=document['content']) }}">{{document['content']}}</a></p>
-            <p>Description: {{document['description']}}</p>
+        <p>{% if document.name == 'cv' %}
+            <p>Attached CV: <a href="{{ url_for('static', filename=document.content) }}" target="_blank">{{ document.content }}</a></p>
+            <p>Description: {{ document.description }}</p>
         {% endif %}</p>
     {% endfor %}
 
 <h4>Templates</h4>
     {% for template in templates %}
-        <p>Name: {{template['name']}}</p>
-        <p>Content: {{template['content']}}</p>
+        <p>Name: {{ template.name }}</p>
+        <p>Content: {{ template.content }}</p>
     {% endfor %}
+
+<h3><a href="/user/settings">Edit user data</a><br></h3>
 
 {% endblock %}
