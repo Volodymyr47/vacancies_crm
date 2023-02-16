@@ -3,7 +3,6 @@ from flask import render_template, request, redirect, url_for
 
 import data
 import dbsettings as db
-from library import Contact, History
 from models import Vacancy, Event, User, Document, Template, EmailCredential
 
 app = Flask(__name__)
@@ -76,7 +75,7 @@ def vacancy(vacancy_id):
         dict - data of specific vacancy
     """
     db.init_db()
-    contact = Contact(vacancy_id)
+    contact = data.Contact(vacancy_id)
 
     if request.method == 'POST':
         if request.form.get('position_name', '').strip() == '':
@@ -207,7 +206,7 @@ def vacancy_history(vacancy_id):
     Returns:
         list - list of vacancy's history dictionaries
     """
-    history = History(vacancy_id).get_history
+    history = data.History(vacancy_id).get_history
     return render_template('history.html',
                            title=f'History of vacancy {vacancy_id}',
                            history=history)
@@ -353,4 +352,4 @@ def user_templates():
 
 if __name__ == '__main__':
     app.secret_key = '!@JkikSPdkp9871jiod89^%&*&Ghuhgu'
-    app.run(debug=True, use_reloader=True)
+    app.run(debug=True, use_reloader=True, host="0.0.0.0", port=5050)

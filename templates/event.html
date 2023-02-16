@@ -16,6 +16,13 @@
 <div id="event_edit">
 
     <form action="" method="POST">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <p style="color: red">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
         <p><label for="title">*Title:</label><br>
         <input type="text" name="title" id="title" value="{{ specific_event.title }}" required></p>
 

@@ -24,6 +24,13 @@
 
 <div id="vacancy_edit">
   <form action="" method="POST">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <p style="color: red">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
     <p><label for="position_name">*Position name:</label><br>
     <input type="text" id="position_name" name="position_name" value="{{specific_vacancy.position_name}}" required></p>
 

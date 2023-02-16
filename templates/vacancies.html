@@ -34,10 +34,9 @@
     <div>
         {% for vacancy in vacancies %}
             <ul>
-                <li><a href="/vacancy/{{ vacancy['id'] }}"><b>Look at vacancy №: {{vacancy['id']}}</b></a></li>
+                <li><a href="/vacancy/{{ vacancy['id'] }}"><b>{{vacancy['position_name']}}</b></a></li>
                 <i>Created</i>: {{vacancy['creation_date']}}<br>
                 <i>Company</i>: {{vacancy['company']}}<br>
-                <i>Position</i>: {{vacancy['position_name']}}<br>
             </ul>
         {% endfor %}
     </div>
