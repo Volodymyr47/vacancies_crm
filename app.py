@@ -2,6 +2,7 @@ from flask import Flask, flash
 from flask import render_template, request, redirect, url_for
 
 import data
+import constant_message as msg
 import dbsettings as db
 from models import Vacancy, Event, User, Document, Template, EmailCredential
 
@@ -25,16 +26,17 @@ def vacancies():
     Returns:
         list - list of dictionaries of vacancies
     """
-    db.init_db()
+    if not db.init_db():
+        flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
         if request.form.get('position_name', '').strip() == '':
-            flash('Field "Position name" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Position name'), category='danger')
             return redirect(url_for('vacancies'))
         if request.form.get('company', '').strip() == '':
-            flash('Field "Company" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Company'), category='danger')
             return redirect(url_for('vacancies'))
         if request.form.get('description', '').strip() == '':
-            flash('Field "Description" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Description'), category='danger')
             return redirect(url_for('vacancies'))
 
         position_name = request.form.get('position_name')
@@ -74,18 +76,19 @@ def vacancy(vacancy_id):
     Returns:
         dict - data of specific vacancy
     """
-    db.init_db()
+    if not db.init_db():
+        flash(msg.CONNECTION_ERR, category="danger")
     contact = data.Contact(vacancy_id)
 
     if request.method == 'POST':
         if request.form.get('position_name', '').strip() == '':
-            flash('Field "Position name" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Position name'), category='danger')
             return redirect(url_for('vacancies'))
         if request.form.get('company', '').strip() == '':
-            flash('Field "Company" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Company'), category='danger')
             return redirect(url_for('vacancies'))
         if request.form.get('description', '').strip() == '':
-            flash('Field "Description" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Description'), category='danger')
             return redirect(url_for('vacancies'))
 
         position_name = request.form.get('position_name')
@@ -125,10 +128,11 @@ def vacancy_events(vacancy_id):
     Returns:
         list - list of events
     """
-    db.init_db()
+    if not db.init_db():
+        flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
         if request.form.get('title', '').strip() == '':
-            flash('Field "Title" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Title'), category='danger')
             return redirect(url_for('vacancy_events'))
 
         title = request.form.get('title')
@@ -166,14 +170,15 @@ def vacancy_event(vacancy_id, event_id):
     Returns:
         dict - dictionary of event's data
     """
-    db.init_db()
+    if not db.init_db():
+        flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
         if request.form.get('title', '').strip() == '':
-            flash('Field "Title" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Title'), category='danger')
             return redirect(url_for('vacancy_event'))
 
         if request.form.get('status', '').strip() == '':
-            flash('Field "Status" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Status'), category='danger')
             return redirect(url_for('vacancy_event'))
 
         title = request.form.get('title')
@@ -219,7 +224,8 @@ def user_menu():
     Returns:
         list - list of user's data dictionary
     """
-    db.init_db()
+    if not db.init_db():
+        flash('Base connection error', category="danger")
     user_data = ''
     documents = ''
     templates = ''
@@ -258,22 +264,23 @@ def user_settings():
     Returns:
         tuples - User, Document, Template data
     """
-    db.init_db()
+    if not db.init_db():
+        flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
         if request.form.get('user_name', '').strip() == '':
-            flash('Field "Name" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Name'), category='danger')
             return redirect(url_for('user_settings'))
 
         if request.form.get('login', '').strip() == '':
-            flash('Field "Login" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Login'), category='danger')
             return redirect(url_for('user_settings'))
 
         if request.form.get('passwd', '').strip() == '':
-            flash('Field "Password" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Password'), category='danger')
             return redirect(url_for('user_settings'))
 
         if request.form.get('email', '').strip() == '':
-            flash('Field "Email" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Email'), category='danger')
             return redirect(url_for('user_settings'))
 
         user_name = request.form.get('user_name')
@@ -282,19 +289,19 @@ def user_settings():
         email = request.form.get('email')
 
         if request.form.get('email_login', '').strip() == '':
-            flash('Field "Email Login" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Email Login'), category='danger')
             return redirect(url_for('user_settings'))
 
         if request.form.get('email_passwd', '').strip() == '':
-            flash('Field "Email Password" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='Email Password'), category='danger')
             return redirect(url_for('user_settings'))
 
         if request.form.get('pop_server', '').strip() == '':
-            flash('Field "POP-server" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='POP-server'), category='danger')
             return redirect(url_for('user_settings'))
 
         if request.form.get('smtp_server', '').strip() == '':
-            flash('Field "SMTP-server" must be populated', category='danger')
+            flash(msg.POPULATION_ERR.format(field='SMTP-server'), category='danger')
             return redirect(url_for('user_settings'))
 
         email_login = request.form.get('email_login')
@@ -304,11 +311,18 @@ def user_settings():
 
         try:
             user_to_upd = db.db_session.query(User).first()
-            user_to_upd.name = user_name
-            user_to_upd.login = login
-            user_to_upd.passwd = passwd
-            user_to_upd.email = email
-
+            if user_to_upd:
+                user_to_upd.name = user_name
+                user_to_upd.login = login
+                user_to_upd.passwd = passwd
+                user_to_upd.email = email
+            else:
+                new_user = User(name=user_name,
+                                login=login,
+                                password=passwd,
+                                email=email)
+                db.db_session.add(new_user)
+                db.db_session.commit()
             email_cred_to_upd = db.db_session.query(EmailCredential).first()
             if email_cred_to_upd:
                 email_cred_to_upd.email_login = email_login
@@ -323,7 +337,7 @@ def user_settings():
                                                  smtp_server=smtp_server,
                                                  user_id=1)
                 db.db_session.add(new_email_cred)
-            db.db_session.commit()
+                db.db_session.commit()
             return redirect(url_for('user_menu'))
         except Exception as err:
             print(err)

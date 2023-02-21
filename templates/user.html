@@ -11,6 +11,14 @@
 
 <h4>User info</h4>
 
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <p style="color: red">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
 <p>User name: {{ user_data.name }}</p>
 <p>Email: {{ user_data.email }}</p>
 <p>Login: {{ user_data.login }}</p>
@@ -22,12 +30,12 @@
         <p>{% if document.name == 'photo' %}
             <img src="{{ url_for('static', filename=document.content) }}" alt="Photo" height="300" width="300">
             <p>Description: {{ document.description }}</p>
-        {% endif %}</p>
+        {% endif %}
 
         <p>{% if document.name == 'cv' %}
             <p>Attached CV: <a href="{{ url_for('static', filename=document.content) }}" target="_blank">{{ document.content }}</a></p>
             <p>Description: {{ document.description }}</p>
-        {% endif %}</p>
+        {% endif %}
     {% endfor %}
 
 <h4>Templates</h4>

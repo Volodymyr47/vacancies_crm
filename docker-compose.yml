@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    ports:
+      - "5000:5050"
+    environment:
+      FLASK_DEBUG: "true"
+      DATABASE_URL: "postgresql://postgres:mysecretpassword@postgres:5432/vacanciesdb"
+    hostname: "web"
+  postgres:
+    image: "postgres"
+    environment:
+      POSTGRES_PASSWORD: "mysecretpassword"
+    ports:
+      - "5432:5432"
+    hostname: "postgres"

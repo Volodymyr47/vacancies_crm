@@ -6,14 +6,16 @@
 
 {% block body %}
 <h1>{{title}}</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+        <p style="color: red">{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
     <p><a href="/">Homepage</a></p>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-            <p style="color: red">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
     <p><button onclick="show_vacancy_form()" id="new_vacancy_button">Add new vacancy</button></p>
 
     <div id="vacancy_form">
@@ -21,11 +23,11 @@
             <p>*<input type="text" name="position_name" placeholder="Position name" required></p>
             <p>*<input type="text" name="company" placeholder="Company name" required></p>
             <p>*<textarea name="description" placeholder="Description" required></textarea></p>
-            <select name="contacts">
+            <p><select name="contacts">
                <option name="phone">Phone:</option>
                <option name="email">Email: </option>
-                 <input type="text" name="phone">
-            <p></select></p>
+            </select>
+            <input type="text" name="contact"></p>
             <p><textarea name="comment" placeholder="Your comment"></textarea></p>
             <p><input type="text" name="url" placeholder="Vacancy URL"></p>
             <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy"></p>

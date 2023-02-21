@@ -7,8 +7,8 @@ from dbsettings import Base
 class User(Base):
     __tablename__ = 'user'
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(100), nullable=False, unique=True)
-    login = Column(String(100), nullable=False, unique=True)
+    name = Column(String(120), nullable=False, unique=True)
+    login = Column(String(50), nullable=False, unique=True)
     passwd = Column(String(120), nullable=False)
     email = Column(String(80), nullable=False, unique=True)
 
