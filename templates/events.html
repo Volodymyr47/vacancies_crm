@@ -6,7 +6,6 @@
 
 {% block body %}
 <h1>Events for vacancy <a href="/vacancy/{{ vacancy_id }}">{{title}}</a></h1>
-<p><a href="/">Homepage</a></p>
     {% for event in events %}
         <p>Title: <a href="/vacancy/{{vacancy_id}}/event/{{event.id}}">{{event.title}}</a></p>
         <p><i>Status</i>: {{event.status}}</p>

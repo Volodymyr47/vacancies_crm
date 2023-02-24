@@ -4,10 +4,11 @@
 *.pyc
 *.pyo
 *old*
+test*
 env/
 venv/
 .venv/
-env*
+.env*
 dist/
 build/
 *.egg

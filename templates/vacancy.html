@@ -6,7 +6,6 @@
 
 {% block body %}
 <h1>{{title}}</h1>
-<p><a href="/">Homepage</a></p>
 
         <p><i>Created</i>: {{specific_vacancy.creation_date}}</p>
         <p><i>Status</i>: {{specific_vacancy.status}}</p>
@@ -18,9 +17,9 @@
             <ul>
                 {{contact}}
             </ul>
-        {% endfor %}
+        {% endfor %}<br><br>
 
-<p><button id="edit_button" onclick="show_vacancy_edit_form()">Edit</button></p>
+<p><button id="edit_button" onclick="show_vacancy_edit_form()">Edit current vacancy</button></p>
 
 <div id="vacancy_edit">
   <form action="" method="POST">
@@ -60,17 +59,41 @@
  </form>
 </div>
 
+<h4><a href="/user/mail">Send mail</a></h4>
+<!--<p><button id="show_mailform_btn" onclick="show_send_mail_form()">Send email</button></p>-->
+<!--<div id="send_mail_form">-->
+<!--    -->
+<!--</div><br>-->
+
     <h4><a href="/vacancy/{{specific_vacancy.id}}/events">Events</a></h4>
     <h4><a href="/vacancy/{{specific_vacancy.id}}/history">History</a></h4>
     <h4><a href="/vacancies">Back to all vacancies</a></h4>
 
+<div style="margin: 5px 20px 10px 20px">
+    {% for key, value in emails.items() %}
+    <br><p>Email ID: {{ key }}</p>
+        <p>Email From: {{ value.get('email_from') }}</p>
+        <p>Email To: {{ value.get('email_to') }}</p>
+        <p>Subject: {{ value.get('email_subject') }}</p>
+        <p>Content:</p><div>{{ value.get('content') | safe }}</div>
+
+    {% endfor %}
+</div>
+
 <script>
     document.getElementById('vacancy_edit').style.display = 'none';
+    document.getElementById('send_mail_form').style.display = 'none';
 
     function show_vacancy_edit_form() {
       document.getElementById('vacancy_edit').style.display = 'block';
       document.getElementById('edit_button').style.display = 'none'
     }
+
+<!--    function show_send_mail_form() {-->
+<!--      document.getElementById('send_mail_form').style.display = 'block';-->
+<!--      document.getElementById('show_mailform_btn').style.display = 'none'-->
+<!--    }-->
+
 </script>
 
 {% endblock %}

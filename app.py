@@ -1,10 +1,12 @@
 from flask import Flask, flash
 from flask import render_template, request, redirect, url_for
+import os
 
 import data
 import constant_message as msg
 import dbsettings as db
 from models import Vacancy, Event, User, Document, Template, EmailCredential
+from email_lib import EmailWrapper
 
 app = Flask(__name__)
 
@@ -112,11 +114,18 @@ def vacancy(vacancy_id):
         except Exception as err:
             print(f'Vacancy updating error:\n{err}')
 
+    mail = EmailWrapper(login='volodymyr.di@gmail.com', password=os.environ.get('EMAIL_PASSWORD'),
+                        email='volodymyr.di@gmail.com',
+                        pop_server='pop.gmail.com', pop_port=995,
+                        imap_server='imap.gmail.com', imap_port=993,
+                        smtp_server='smtp.gmail.com', smtp_port=465)
     specific_vacancy = db.db_session.query(Vacancy).filter_by(id=vacancy_id).first()
+    emails = mail.get_mail_by_pop()
     return render_template('vacancy.html',
                            title=specific_vacancy.position_name,
                            specific_vacancy=specific_vacancy,
-                           contacts=contact.get_contacts)
+                           contacts=contact.get_contacts,
+                           emails=emails)
 
 
 @app.route('/vacancy/<int:vacancy_id>/events', methods=['GET', 'POST'])
@@ -252,9 +261,25 @@ def user_calendar():
     return 'User calendar'
 
 
-@app.route('/user/mail', methods=['GET'])
+@app.route('/user/mail', methods=['GET', 'POST'])
 def user_mail():
-    return 'User mail'
+    mail = EmailWrapper(login='volodymyr.di@gmail.com', password=os.environ.get('EMAIL_PASSWORD'),
+                        email='volodymyr.di@gmail.com',
+                        pop_server='pop.gmail.com', pop_port=995,
+                        imap_server='imap.gmail.com', imap_port=993,
+                        smtp_server='smtp.gmail.com', smtp_port=465)
+
+    if request.method == 'POST':
+        if request.form.get('recipient', '').strip() == '':
+            flash(msg.POPULATION_ERR.format(field='Recipient'), category='danger')
+            return redirect(url_for('send_mail'))
+
+        recipient = request.form.get('recipient')
+        message = request.form.get('message')
+        mail.send_mail(recipient, message)
+        return redirect(url_for('vacancies'))
+
+    return render_template('send-mail.html', title='Send mail')
 
 
 @app.route('/user/settings', methods=['GET', 'POST'])

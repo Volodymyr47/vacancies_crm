@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block body %}
+
+<form action="" method="POST">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                <p style="color: red">{{ message }}</p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <p><label for="recipient">*Recipient:</label><br>
+        <input type="text" id="recipient" name="recipient" required></p>
+
+        <p><label for="message">Message:</label><br>
+        <textarea id="message" name="message"></textarea></p>
+
+        <input type="submit" name="send" value=" Send ">
+    </form>
+
+{% endblock %}

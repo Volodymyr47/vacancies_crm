@@ -15,7 +15,6 @@
     {% endif %}
 {% endwith %}
 
-    <p><a href="/">Homepage</a></p>
     <p><button onclick="show_vacancy_form()" id="new_vacancy_button">Add new vacancy</button></p>
 
     <div id="vacancy_form">
@@ -30,7 +29,8 @@
             <input type="text" name="contact"></p>
             <p><textarea name="comment" placeholder="Your comment"></textarea></p>
             <p><input type="text" name="url" placeholder="Vacancy URL"></p>
-            <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy"></p>
+            <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy">
+                <a href="/vacancies">Cancel</a></p>
         </form>
     </div>
     <div>

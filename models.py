@@ -28,15 +28,26 @@ class EmailCredential(Base):
     user_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     email_login = Column(String(120), nullable=False)
     email_passwd = Column(String(120), nullable=False)
-    pop_server = Column(String(150), nullable=False)
-    smtp_server = Column(String(150), nullable=False)
+    pop_server = Column(String(100), nullable=True)
+    pop_port = Column(Integer, nullable=True)
+    imap_server = Column(String(100), nullable=True)
+    imap_port = Column(Integer, nullable=True)
+    smtp_server = Column(String(100), nullable=True)
+    smtp_port = Column(Integer, nullable=True)
 
-    def __init__(self, email_login, email_passwd, pop_server, smtp_server, user_id):
+    def __init__(self, user_id, email_login, email_passwd,
+                 pop_server, pop_port,
+                 imap_server, imap_port,
+                 smtp_server, smtp_port):
+        self.user_id = user_id
         self.email_login = email_login
         self.email_passwd = email_passwd
         self.pop_server = pop_server
+        self.pop_port = pop_port
+        self.imap_server = imap_server
+        self.imap_port = imap_port
         self.smtp_server = smtp_server
-        self.user_id = user_id
+        self.smtp_port = smtp_port
 
 
 class Vacancy(Base):
