@@ -7,7 +7,6 @@ import ssl, email
 
 
 class EmailWrapper:
-
     def __init__(
                  self, login, password, email,
                  pop_server=None, pop_port=995,
@@ -98,8 +97,13 @@ class EmailWrapper:
         imap_server.close()
         imap_server.logout()
 
-    def send_mail(self, recipient, message):
-        context = ssl.create_default_context()
-        with SMTP_SSL(self.smtp_server[0], self.smtp_port, context=context) as smtp:
+    def send_mail(self, recipient, subject, message):
+        content = ssl.create_default_context()
+        msg = email.message.EmailMessage()
+        msg['To'] = recipient
+        msg['From'] = self.email
+        msg['Subject'] = subject
+        msg.set_content(message)
+        with SMTP_SSL(self.smtp_server[0], self.smtp_port, context=content) as smtp:
             smtp.login(self.login[0], self.passwd[0])
-            smtp.sendmail(self.email[0], recipient, message)
+            smtp.send_message(msg)

@@ -4,9 +4,11 @@ import os
 
 import data
 import constant_message as msg
-import dbsettings as db
+import postgresdb as db
 from models import Vacancy, Event, User, Document, Template, EmailCredential
 from email_lib import EmailWrapper
+from mongodb import MongoDatabase
+
 
 app = Flask(__name__)
 
@@ -41,17 +43,28 @@ def vacancies():
             flash(msg.POPULATION_ERR.format(field='Description'), category='danger')
             return redirect(url_for('vacancies'))
 
+        contact_name = request.form.get('contact_name')
+        contact_email = request.form.get('contact_email')
+        contact_phone = request.form.get('contact_phone')
+        new_contact_id = 0
+        try:
+            contact = MongoDatabase('contacts_db', 'contacts')
+            new_contact_id = contact.insert_record(name=contact_name,
+                                            email=contact_email,
+                                            phone=contact_phone)
+        except Exception as err:
+            print(err)
+
         position_name = request.form.get('position_name')
         company = request.form.get('company')
         description = request.form.get('description')
-        contacts = '4, 5, 6'
         comment = request.form.get('comment')
         url = request.form.get('url')
 
         vacancy_data = Vacancy(position_name=position_name,
                                company=company,
                                description=description,
-                               contacts_ids=contacts,
+                               contacts_ids=str(new_contact_id),
                                comment=comment,
                                url=url,
                                status=1,
@@ -80,7 +93,8 @@ def vacancy(vacancy_id):
     """
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
-    contact = data.Contact(vacancy_id)
+
+    contact = MongoDatabase('contacts_db', 'contacts')
 
     if request.method == 'POST':
         if request.form.get('position_name', '').strip() == '':
@@ -93,24 +107,41 @@ def vacancy(vacancy_id):
             flash(msg.POPULATION_ERR.format(field='Description'), category='danger')
             return redirect(url_for('vacancies'))
 
+        contact_name = request.form.get('contact_name')
+        contact_email = request.form.get('contact_email')
+        contact_phone = request.form.get('contact_phone')
+        contact_id = request.form.get('_id')
+
+        new_contact_id = contact.insert_record(name=contact_name,
+                                            email=contact_email,
+                                            phone=contact_phone)
+
         position_name = request.form.get('position_name')
         company = request.form.get('company')
         description = request.form.get('description')
-        contacts = '4, 5, 6'
         comment = request.form.get('comment')
         url = request.form.get('url')
         status = request.form.get('status')
+
+        contact_ids = ''
+        if new_contact_id:
+            contact_ids = ',' + str(new_contact_id)
 
         try:
             vacancy_to_upd = db.db_session.query(Vacancy).get(vacancy_id)
             vacancy_to_upd.position_name = position_name
             vacancy_to_upd.company = company
             vacancy_to_upd.description = description
-            vacancy_to_upd.contacts = contacts
+            vacancy_to_upd.contacts_ids = vacancy_to_upd.contacts_ids + contact_ids
             vacancy_to_upd.comment = comment
             vacancy_to_upd.url = url
             vacancy_to_upd.status = status
             db.db_session.commit()
+            # if vacancy_to_upd.contacts_ids:
+            #     contacts_to_upt = vacancy_to_upd.contacts_ids.split(',')
+            #     contact.update_record(contacts_to_upt)
+            print('vacancy_to_upd.contacts_ids = ', vacancy_to_upd.contacts_ids)
+            print('type: ',type(vacancy_to_upd.contacts_ids))
         except Exception as err:
             print(f'Vacancy updating error:\n{err}')
 
@@ -120,11 +151,13 @@ def vacancy(vacancy_id):
                         imap_server='imap.gmail.com', imap_port=993,
                         smtp_server='smtp.gmail.com', smtp_port=465)
     specific_vacancy = db.db_session.query(Vacancy).filter_by(id=vacancy_id).first()
-    emails = mail.get_mail_by_pop()
+    contact_ids = str(specific_vacancy.contacts_ids).split(',')
+    vacancy_contacts = contact.select(contact_ids)
+    emails = dict(reversed(list(mail.get_mail_by_pop().items())))
     return render_template('vacancy.html',
                            title=specific_vacancy.position_name,
                            specific_vacancy=specific_vacancy,
-                           contacts=contact.get_contacts,
+                           vacancy_contacts=vacancy_contacts,
                            emails=emails)
 
 
@@ -274,9 +307,16 @@ def user_mail():
             flash(msg.POPULATION_ERR.format(field='Recipient'), category='danger')
             return redirect(url_for('send_mail'))
 
+        if request.form.get('subject', '').strip() == '':
+            flash(msg.POPULATION_ERR.format(field='Subject'), category='danger')
+            return redirect(url_for('send_mail'))
+
         recipient = request.form.get('recipient')
+        subject = request.form.get('subject')
         message = request.form.get('message')
-        mail.send_mail(recipient, message)
+        mail.send_mail(recipient=recipient,
+                       subject=subject,
+                       message=message)
         return redirect(url_for('vacancies'))
 
     return render_template('send-mail.html', title='Send mail')

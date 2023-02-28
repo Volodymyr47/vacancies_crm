@@ -13,16 +13,28 @@
         <p><i>Company</i>: {{specific_vacancy.company}}</p>
         <p><i>Description</i>: {{specific_vacancy.description}}</p>
         <p><b>Contacts:</b></p>
-        {% for contact in contacts %}
-            <ul>
-                {{contact}}
-            </ul>
-        {% endfor %}<br><br>
+        {% if vacancy_contacts %}
+            {% for contacts in vacancy_contacts %}
+              {% if contacts['message'] %}
+                {{ contacts['message'] }}
+              {% else %}
+                {% for key, value in contacts.items() %}
+                    <ul>
+                        {% if key != '_id' %}
+                            <li>{{ key.capitalize() }}: <b>{{ value }}</b></li>
+                        {% endif %}
+                    </ul>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+        {% endif %}
+      <br>
 
 <p><button id="edit_button" onclick="show_vacancy_edit_form()">Edit current vacancy</button></p>
 
 <div id="vacancy_edit">
   <form action="" method="POST">
+
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -30,6 +42,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+
     <p><label for="position_name">*Position name:</label><br>
     <input type="text" id="position_name" name="position_name" value="{{specific_vacancy.position_name}}" required></p>
 
@@ -39,15 +52,31 @@
     <p><label for="desc">*Description:</label><br>
     <textarea name="description" id="desc" required>{{specific_vacancy.description}}</textarea></p>
 
-    <p><label for="contacts">Contacts:</label><br>
-    <select name="contacts" id="contacts">
-      <option name="phone">Phone:</option>
-      <option name="email">Email: </option>
-        <input type="text" name="phone">
-    </select></p>
+    <label for="contacts">Contacts: </label>
+    {% if vacancy_contacts %}
+      {% for contacts in vacancy_contacts %}
+        {% if not contacts['message'] %}
+            {% for key, value in contacts.items() %}
+              <ul id="contacts">
+                  {% if key == '_id' %}
+                    <li hidden>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
+                  {% else %}
+                    <li>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
+                  {% endif %}
+              </ul>
+            {% endfor %}
+        {% else %}
+          <ul id="new_contact">
+            <li><input type="text" name="contact_name" placeholder="Name or Position"></li>
+            <li><input type="email" name="contact_email" placeholder="Email"></li>
+            <li><input type="text" name="contact_phone" placeholder="Phone number"></li>
+          </ul>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
 
     <p><label for="comment">Comment:</label><br>
-    <textarea name="comment" id="comment" required>{{specific_vacancy.comment}}</textarea></p>
+    <textarea name="comment" id="comment">{{specific_vacancy.comment}}</textarea></p>
 
     <p><label for="url">URL:</label><br>
     <input type="text" name="url" id="url" value="{{specific_vacancy.url}}"></p>

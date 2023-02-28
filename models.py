@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
 from datetime import datetime
 
-from dbsettings import Base
+from postgresdb import Base
 
 
 class User(Base):

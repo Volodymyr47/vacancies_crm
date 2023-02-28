@@ -22,11 +22,12 @@
             <p>*<input type="text" name="position_name" placeholder="Position name" required></p>
             <p>*<input type="text" name="company" placeholder="Company name" required></p>
             <p>*<textarea name="description" placeholder="Description" required></textarea></p>
-            <p><select name="contacts">
-               <option name="phone">Phone:</option>
-               <option name="email">Email: </option>
-            </select>
-            <input type="text" name="contact"></p>
+            <label for="contacts">Contacts: </label>
+              <ul id="contacts">
+                <li><input type="text" name="contact_name" placeholder="Contact name"></li>
+                <li><input type="email" name="contact_email" placeholder="Contact Email"></li>
+                <li><input type="text" name="contact_phone" placeholder="Phone number"></li>
+              </ul>
             <p><textarea name="comment" placeholder="Your comment"></textarea></p>
             <p><input type="text" name="url" placeholder="Vacancy URL"></p>
             <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy">
