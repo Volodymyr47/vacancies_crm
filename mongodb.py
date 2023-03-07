@@ -26,7 +26,6 @@ class MongoDatabase:
             contacts = db.get_collection(self.collection)
             try:
                 existing_id = self._specific_record_exist(contacts, **kwargs)
-                print('existing_id = ',existing_id)
                 if not existing_id:
                     new_record_id = contacts.insert_one(kwargs).inserted_id
                     return new_record_id
@@ -67,3 +66,6 @@ class MongoDatabase:
                     if data:
                         result.append(data)
             return result or [{"message": "No contacts found"}]
+
+asd = MongoDatabase('contacts_db', 'contacts')
+asd.insert_record(name='HR Anna',email='anna@company.com',phone='987987654654')

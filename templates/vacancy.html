@@ -30,11 +30,10 @@
         {% endif %}
       <br>
 
-<p><button id="edit_button" onclick="show_vacancy_edit_form()">Edit current vacancy</button></p>
 
+<p><button id="edit_button" onclick="show_vacancy_edit_form()">Edit current vacancy</button></p>
 <div id="vacancy_edit">
   <form action="" method="POST">
-
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -52,29 +51,6 @@
     <p><label for="desc">*Description:</label><br>
     <textarea name="description" id="desc" required>{{specific_vacancy.description}}</textarea></p>
 
-    <label for="contacts">Contacts: </label>
-    {% if vacancy_contacts %}
-      {% for contacts in vacancy_contacts %}
-        {% if not contacts['message'] %}
-            {% for key, value in contacts.items() %}
-              <ul id="contacts">
-                  {% if key == '_id' %}
-                    <li hidden>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
-                  {% else %}
-                    <li>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
-                  {% endif %}
-              </ul>
-            {% endfor %}
-        {% else %}
-          <ul id="new_contact">
-            <li><input type="text" name="contact_name" placeholder="Name or Position"></li>
-            <li><input type="email" name="contact_email" placeholder="Email"></li>
-            <li><input type="text" name="contact_phone" placeholder="Phone number"></li>
-          </ul>
-      {% endif %}
-    {% endfor %}
-  {% endif %}
-
     <p><label for="comment">Comment:</label><br>
     <textarea name="comment" id="comment">{{specific_vacancy.comment}}</textarea></p>
 
@@ -86,6 +62,40 @@
 
     <p><input type="submit" name="save_vacancy" value="Save vacancy"></p>
  </form>
+
+
+{% if vacancy_contacts %}
+  {% for contacts in vacancy_contacts %}
+      <form action="/vacancy/{{ specific_vacancy.id }}/contact/{{ contacts['_id'] }}" method="POST">
+        {% if not contacts['message'] %}
+            {% for key, value in contacts.items() %}
+              <ul id="contacts">
+                  {% if key == '_id' %}
+                    <li hidden>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
+                  {% else %}
+                    <li>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
+                  {% endif %}
+              </ul>
+            {% endfor %}
+          <div id="new_contact_form">
+            <fieldset>
+                <legend>New contact</legend>
+                <input type="text" name="name" placeholder="Name"><br>
+                <input type="email" name="email" placeholder="Email"><br>
+                <input type="text" name="phone" placeholder="Phone number"><br>
+            </fieldset>
+          </div>
+        {% else %}
+          <ul id="new_contact">
+            <li><input type="text" name="contact_name" placeholder="Name or Position"></li>
+            <li><input type="email" name="contact_email" placeholder="Email"></li>
+            <li><input type="text" name="contact_phone" placeholder="Phone number"></li>
+          </ul>
+        {% endif %}<br>
+          <input type="submit" value="Save contacts">
+      </form>
+    {% endfor %}
+{% endif %}
 </div>
 
 <h4><a href="/user/mail">Send mail</a></h4>

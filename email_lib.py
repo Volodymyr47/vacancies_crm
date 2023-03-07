@@ -3,19 +3,19 @@ from poplib import POP3_SSL
 from imaplib import IMAP4_SSL
 from email.parser import Parser
 from email.header import decode_header
-import ssl, email
+import email
 
 
 class EmailWrapper:
     def __init__(
-                 self, login, password, email,
+                 self, login, password,
                  pop_server=None, pop_port=995,
                  imap_server=None, imap_port=993,
                  smtp_server=None, smtp_port=465
                  ):
         self.login = login,
         self.passwd = password,
-        self.email = email,
+        # self.email = email,
         self.pop_server = pop_server,
         self.pop_port = pop_port,
         self.imap_server = imap_server,
@@ -98,12 +98,11 @@ class EmailWrapper:
         imap_server.logout()
 
     def send_mail(self, recipient, subject, message):
-        content = ssl.create_default_context()
         msg = email.message.EmailMessage()
         msg['To'] = recipient
-        msg['From'] = self.email
+        msg['From'] = self.login
         msg['Subject'] = subject
         msg.set_content(message)
-        with SMTP_SSL(self.smtp_server[0], self.smtp_port, context=content) as smtp:
+        with SMTP_SSL(self.smtp_server[0], self.smtp_port) as smtp:
             smtp.login(self.login[0], self.passwd[0])
             smtp.send_message(msg)

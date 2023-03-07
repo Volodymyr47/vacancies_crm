@@ -8,6 +8,7 @@ import postgresdb as db
 from models import Vacancy, Event, User, Document, Template, EmailCredential
 from email_lib import EmailWrapper
 from mongodb import MongoDatabase
+from celery_worker import async_send_mail
 
 
 app = Flask(__name__)
@@ -146,7 +147,7 @@ def vacancy(vacancy_id):
             print(f'Vacancy updating error:\n{err}')
 
     mail = EmailWrapper(login='volodymyr.di@gmail.com', password=os.environ.get('EMAIL_PASSWORD'),
-                        email='volodymyr.di@gmail.com',
+                        # email='volodymyr.di@gmail.com',
                         pop_server='pop.gmail.com', pop_port=995,
                         imap_server='imap.gmail.com', imap_port=993,
                         smtp_server='smtp.gmail.com', smtp_port=465)
@@ -267,7 +268,7 @@ def user_menu():
         list - list of user's data dictionary
     """
     if not db.init_db():
-        flash('Base connection error', category="danger")
+        flash(msg.CONNECTION_ERR, category="danger")
     user_data = ''
     documents = ''
     templates = ''
@@ -296,12 +297,12 @@ def user_calendar():
 
 @app.route('/user/mail', methods=['GET', 'POST'])
 def user_mail():
-    mail = EmailWrapper(login='volodymyr.di@gmail.com', password=os.environ.get('EMAIL_PASSWORD'),
-                        email='volodymyr.di@gmail.com',
-                        pop_server='pop.gmail.com', pop_port=995,
-                        imap_server='imap.gmail.com', imap_port=993,
-                        smtp_server='smtp.gmail.com', smtp_port=465)
-
+    """
+    Send mail to recipient
+    Returns: redirection to page of 'vacancies'
+    """
+    if not db.init_db():
+        flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
         if request.form.get('recipient', '').strip() == '':
             flash(msg.POPULATION_ERR.format(field='Recipient'), category='danger')
@@ -314,9 +315,9 @@ def user_mail():
         recipient = request.form.get('recipient')
         subject = request.form.get('subject')
         message = request.form.get('message')
-        mail.send_mail(recipient=recipient,
-                       subject=subject,
-                       message=message)
+        creds_id = db.db_session.query(EmailCredential).filter_by(user_id=1).first()
+
+        async_send_mail.apply_async(args=[creds_id.id, recipient, subject, message])
         return redirect(url_for('vacancies'))
 
     return render_template('send-mail.html', title='Send mail')
@@ -427,6 +428,29 @@ def user_documents():
 @app.route('/user/templates', methods=['GET', 'POST'])
 def user_templates():
     return 'User templates'
+
+
+@app.route('/vacancy/<int:vacancy_id>/contacts', methods=['GET', 'POST'])
+def add_contact(vacancy_id):
+    if request.method == 'POST':
+        name = request.form.get('name')
+        mail = request.form.get('email')
+        phone = request.form.get('phone')
+
+        print(name, mail, phone)
+    return redirect(url_for('vacancy', vacancy_id=vacancy_id))
+
+
+@app.route('/vacancy/<int:vacancy_id>/contact/<string:contact_id>', methods=['GET', 'POST'])
+def edit_contact(vacancy_id, contact_id):
+    if request.method == 'POST':
+        if contact_id:
+            for _ in request.form.get('contact_id'):
+                name = request.form.get('name')
+                mail = request.form.get('email')
+                phone = request.form.get('phone')
+                print(name, mail, phone)
+    return redirect(url_for('vacancy', vacancy_id=vacancy_id))
 
 
 if __name__ == '__main__':

@@ -1,14 +1,24 @@
 services:
   web:
     build: .
+    command: python app.py
     ports:
       - "5000:5050"
     environment:
       FLASK_DEBUG: "true"
       DATABASE_URL: "postgresql://postgres:mysecretpassword@postgres:5432/vacanciesdb"
       MONGO_HOST: "mongodb"
+      RABBIT_HOST: "rabbit_host"
       EMAIL_PASSWORD: "hhcfdwbcqsteczok"
     hostname: "web"
+
+  celery_worker:
+    build: .
+    command: celery -A celery_worker worker --loglevel=INFO --purge --pool=solo
+    environment:
+      DATABASE_URL: "postgresql://postgres:mysecretpassword@postgres:5432/vacanciesdb"
+      RABBIT_HOST: "rabbit_host"
+    hostname: "celery_worker"
 
   postgres:
     image: "postgres"
@@ -37,3 +47,11 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: root
       ME_CONFIG_MONGODB_ADMINPASSWORD: example
       ME_CONFIG_MONGODB_URL: mongodb://root:example@mongodb:27017/
+
+  rabbitmq:
+    image: "rabbitmq:3-management-alpine"
+    container_name: 'rabbitmq'
+    ports:
+      - 5672:5672
+      - 15672:15672
+    hostname: 'rabbit_host'

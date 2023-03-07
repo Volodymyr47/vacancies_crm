@@ -49,6 +49,13 @@ class EmailCredential(Base):
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
 
+    def get_smtp_mandatory_fields(self):
+        return {'login': self.email_login,
+                'password': self.email_passwd,
+                'smtp_server': self.smtp_server,
+                'smtp_port': self.smtp_port
+                }
+
 
 class Vacancy(Base):
     __tablename__ = 'vacancy'
