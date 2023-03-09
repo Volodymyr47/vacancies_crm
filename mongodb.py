@@ -32,17 +32,20 @@ class MongoDatabase:
             except Exception as err:
                 print(err)
 
-    def update_record(self, contact_ids, **kwargs):
+    def update_record(self, contact_id, new_data):
         with MongoClient(self.connection_str) as client:
             db = client.get_database(self.dbname)
             contacts = db.get_collection(self.collection)
+
+            if not isinstance(new_data, dict):
+                new_data = dict(new_data)
+            if new_data.get('_id'):
+                new_data.pop('_id')
             try:
-                for contact_id in contact_ids:
-                    if contact_id:
-                        contacts.update_one({"_id": ObjectId(contact_id)}, {'$set': kwargs})
+                contacts.update_one({"_id": ObjectId(contact_id)}, {"$set": new_data})
                 return True
             except Exception as err:
-                print(err)
+                print('Contact updating error:\n',err)
                 return False
 
     def delete_record(self, contact_id):
@@ -66,6 +69,3 @@ class MongoDatabase:
                     if data:
                         result.append(data)
             return result or [{"message": "No contacts found"}]
-
-asd = MongoDatabase('contacts_db', 'contacts')
-asd.insert_record(name='HR Anna',email='anna@company.com',phone='987987654654')

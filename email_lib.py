@@ -1,9 +1,12 @@
 from smtplib import SMTP_SSL
-from poplib import POP3_SSL
 from imaplib import IMAP4_SSL
+import poplib
 from email.parser import Parser
 from email.header import decode_header
 import email
+
+
+poplib._MAXLINE = 408400
 
 
 class EmailWrapper:
@@ -32,7 +35,7 @@ class EmailWrapper:
 
     def get_mail_by_pop(self, msg_type='html'):
         result = {}
-        pop_serv = POP3_SSL(self.pop_server[0])
+        pop_serv = poplib.POP3_SSL(self.pop_server[0])
         pop_serv.port = 995
         pop_serv.user(self.login[0])
         pop_serv.pass_(self.passwd[0])

@@ -25,6 +25,7 @@ def home():
 
 
 @app.route('/vacancies', methods=['GET', 'POST'])
+@app.route('/vacancies/', methods=['GET', 'POST'])
 def vacancies():
     """
     Get all vacancies and post new vacancy function
@@ -84,6 +85,7 @@ def vacancies():
 
 
 @app.route('/vacancy/<int:vacancy_id>', methods=['GET', 'POST'])
+@app.route('/vacancy/<int:vacancy_id>/', methods=['GET', 'POST'])
 def vacancy(vacancy_id):
     """
     Show/Edit specific vacancy by ID
@@ -147,7 +149,6 @@ def vacancy(vacancy_id):
             print(f'Vacancy updating error:\n{err}')
 
     mail = EmailWrapper(login='volodymyr.di@gmail.com', password=os.environ.get('EMAIL_PASSWORD'),
-                        # email='volodymyr.di@gmail.com',
                         pop_server='pop.gmail.com', pop_port=995,
                         imap_server='imap.gmail.com', imap_port=993,
                         smtp_server='smtp.gmail.com', smtp_port=465)
@@ -162,7 +163,17 @@ def vacancy(vacancy_id):
                            emails=emails)
 
 
+@app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>', methods=['GET', 'POST'])
+@app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>/', methods=['GET', 'POST'])
+def contact_update(vacancy_id, _id):
+    if request.method == 'POST':
+        contact = MongoDatabase('contacts_db', 'contacts')
+        contact.update_record(_id, new_data=request.form.items())
+    return redirect(url_for('vacancy', vacancy_id=vacancy_id))
+
+
 @app.route('/vacancy/<int:vacancy_id>/events', methods=['GET', 'POST'])
+@app.route('/vacancy/<int:vacancy_id>/events/', methods=['GET', 'POST'])
 def vacancy_events(vacancy_id):
     """
     Show/Edit all vacancy's events

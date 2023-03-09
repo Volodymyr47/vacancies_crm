@@ -69,14 +69,17 @@
       <form action="/vacancy/{{ specific_vacancy.id }}/contact/{{ contacts['_id'] }}" method="POST">
         {% if not contacts['message'] %}
             {% for key, value in contacts.items() %}
+
               <ul id="contacts">
                   {% if key == '_id' %}
                     <li hidden>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
                   {% else %}
                     <li>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
+
                   {% endif %}
               </ul>
             {% endfor %}
+            <a href="" onclick=""> Add new field</a>
           <div id="new_contact_form">
             <fieldset>
                 <legend>New contact</legend>
