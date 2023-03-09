@@ -20,7 +20,7 @@
               {% else %}
                 {% for key, value in contacts.items() %}
                     <ul>
-                        {% if key != '_id' %}
+                        {% if key != '_id' and value %}
                             <li>{{ key.capitalize() }}: <b>{{ value }}</b></li>
                         {% endif %}
                     </ul>
@@ -66,20 +66,21 @@
 
 {% if vacancy_contacts %}
   {% for contacts in vacancy_contacts %}
-      <form action="/vacancy/{{ specific_vacancy.id }}/contact/{{ contacts['_id'] }}" method="POST">
+      <form id="contacts_form" action="/vacancy/{{ specific_vacancy.id }}/contact/{{ contacts['_id'] }}" method="POST">
         {% if not contacts['message'] %}
-            {% for key, value in contacts.items() %}
-
-              <ul id="contacts">
+          <ul id="contacts">
+              {% for key, value in contacts.items() %}
                   {% if key == '_id' %}
                     <li hidden>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
                   {% else %}
                     <li>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
-
                   {% endif %}
-              </ul>
             {% endfor %}
-            <a href="" onclick=""> Add new field</a>
+              <div id="new_fields">
+              </div>
+           </ul>
+          <input type="button" id='addfields' onclick="addNewField()" value="Add new field">
+
           <div id="new_contact_form">
             <fieldset>
                 <legend>New contact</legend>
@@ -97,6 +98,7 @@
         {% endif %}<br>
           <input type="submit" value="Save contacts">
       </form>
+
     {% endfor %}
 {% endif %}
 </div>
@@ -131,10 +133,23 @@
       document.getElementById('edit_button').style.display = 'none'
     }
 
-<!--    function show_send_mail_form() {-->
-<!--      document.getElementById('send_mail_form').style.display = 'block';-->
-<!--      document.getElementById('show_mailform_btn').style.display = 'none'-->
-<!--    }-->
+</script>
+
+<script>
+    function addNewField() {
+        var li = document.createElement('li'),
+            newField = document.createElement('input', 'type=text');
+        let fieldName = prompt('Specify new contact position', 'e.g. Second Phone');
+        newField.placeholder = 'Specify position';
+        newField.id = fieldName;
+        newField.name = fieldName;
+        var newLabel = document.createElement('label');
+        newLabel.for = newField.id;
+        newLabel.innerHTML = fieldName+':\u00A0'
+        li.appendChild(newLabel);
+        li.appendChild(newField);
+        document.getElementById('new_fields').appendChild(li)
+    }
 
 </script>
 

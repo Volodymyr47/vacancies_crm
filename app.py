@@ -163,12 +163,11 @@ def vacancy(vacancy_id):
                            emails=emails)
 
 
-@app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>', methods=['GET', 'POST'])
-@app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>/', methods=['GET', 'POST'])
+@app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>', methods=['POST'])
+@app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>/', methods=['POST'])
 def contact_update(vacancy_id, _id):
-    if request.method == 'POST':
-        contact = MongoDatabase('contacts_db', 'contacts')
-        contact.update_record(_id, new_data=request.form.items())
+    contact = MongoDatabase('contacts_db', 'contacts')
+    contact.update_record(_id, new_data=request.form.items())
     return redirect(url_for('vacancy', vacancy_id=vacancy_id))
 
 
