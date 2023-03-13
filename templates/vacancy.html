@@ -76,7 +76,7 @@
                     <li>{{key.capitalize()}}: <input type="text" name="{{ key }}" value="{{ value }}"></li>
                   {% endif %}
             {% endfor %}
-              <div id="new_fields">
+              <div id="new_field">
               </div>
            </ul>
           <input type="button" id='addfields' onclick="addNewField()" value="Add new field">
@@ -139,8 +139,8 @@
     function addNewField() {
         var li = document.createElement('li'),
             newField = document.createElement('input', 'type=text');
-        let fieldName = prompt('Specify new contact position', 'e.g. Second Phone');
-        newField.placeholder = 'Specify position';
+        let fieldName = prompt('Specify new contact position', 'e.g. Phone2');
+        newField.placeholder = 'Specify value';
         newField.id = fieldName;
         newField.name = fieldName;
         var newLabel = document.createElement('label');
@@ -148,7 +148,7 @@
         newLabel.innerHTML = fieldName+':\u00A0'
         li.appendChild(newLabel);
         li.appendChild(newField);
-        document.getElementById('new_fields').appendChild(li)
+        document.getElementById('new_field').appendChild(li)
     }
 
 </script>

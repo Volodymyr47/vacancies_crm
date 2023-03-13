@@ -1,9 +1,12 @@
 from smtplib import SMTP_SSL
 from imaplib import IMAP4_SSL
-import poplib
 from email.parser import Parser
 from email.header import decode_header
+from mongodb import MongoDatabase
+from models import Vacancy
 import email
+import poplib
+import postgresdb as db
 
 
 poplib._MAXLINE = 408400
@@ -33,7 +36,16 @@ class EmailWrapper:
             value = value.decode(charset)
         return value
 
-    def get_mail_by_pop(self, msg_type='html'):
+    def get_mail_by_pop(self, email_from=None, msg_type='html'):
+        # db.init_db()
+        # email_ids_set = db.db_session.query(Vacancy.contacts_ids).filter(Vacancy.contacts_ids.isnot(None)).all()
+        # email_ids = []
+        # for e_id in email_ids_set:
+        #     if len(e_id[0]) > 0:
+        #         email_ids.append(e_id[0])
+        # print('email_ids=',email_ids)
+        # contacts = MongoDatabase('contacts_db', 'contacts')
+        # contacts.select()
         result = {}
         pop_serv = poplib.POP3_SSL(self.pop_server[0])
         pop_serv.port = 995

@@ -1,2 +1,6 @@
 CONNECTION_ERR = 'Create engine error. Please contact your system administrator.'
 POPULATION_ERR = 'Field {field} must be populated'
+LOGIN_ERR = 'Login failed. Please, check your Username or Password'
+USERNAME_ERR = 'The current username is busy. Please, choose a different username'
+REGISTRATION_ERR = 'Registration error. Please contact your system administrator'
+PASSWORD_MATCH_ERR = 'The Password and Confirm Password do not match'

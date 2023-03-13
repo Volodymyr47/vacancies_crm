@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block body %}
+<h1>{{title}}</h1>
+
+<div class="container" style="width: 300px; margin-top: 20px">
+<form action="/login" class="form-signin" method="POST">
+ {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <p style="color: red">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+ {% endwith %}
+
+  <div class="form-outline mb-1">
+    <label class="form-label" for="user_login">User Login:</label>
+    <input type="text" id="user_login" name="user_login" class="form-control" required>
+  </div>
+  <div class="form-outline mb-1">
+    <label class="form-label" for="password">Password:</label>
+    <input type="password" id="password" name="password" class="form-control" required>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-block mt-4">Sign in</button>
+
+  <div class="text-center">
+    <p>Not a member? <a href="/registration">Register</a></p>
+
+  </div>
+
+</form>
+</div>
+{% endblock %}

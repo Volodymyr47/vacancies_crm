@@ -37,8 +37,6 @@ class MongoDatabase:
             db = client.get_database(self.dbname)
             contacts = db.get_collection(self.collection)
 
-            if not isinstance(new_data, dict):
-                new_data = dict(new_data)
             if new_data.get('_id'):
                 new_data.pop('_id')
             try:

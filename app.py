@@ -1,5 +1,7 @@
 from flask import Flask, flash
 from flask import render_template, request, redirect, url_for
+from flask import session
+from flask import Response
 import os
 
 import data
@@ -21,7 +23,73 @@ def home():
     Returns:
         Homepage greeting
     """
-    return render_template('home.html', title='Vacancies CRM')
+    current_user = session.get('user_name', None)
+    return render_template('home.html', title='Vacancies CRM', username = current_user)
+
+
+@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        user_login = request.form.get('user_login').lower()
+        user_password = request.form.get('password')
+        if user_login.strip() in ['', None] or user_password.strip() in ['', None]:
+            flash(msg.POPULATION_ERR.format(field='Login or Password'), category='warning')
+            return redirect(url_for('login'))
+        user = db.db_session.query(User).filter_by(login=user_login).first()
+        if user is None:
+            flash(msg.LOGIN_ERR, category='warning')
+            return redirect(url_for('login'))
+        if user_password != user.passwd:
+            flash(msg.LOGIN_ERR, category='warning')
+            return redirect(url_for('login'))
+        session['user_id'] = user.id
+        session['user_name'] = user.name
+        return redirect(url_for('home'))
+    return render_template('login.html', title='Login')
+
+
+@app.route('/logout')
+@app.route('/logout/')
+def logout():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    session.pop('user_id')
+    session.pop('user_name')
+    return redirect(url_for('home'))
+
+
+@app.route('/registration', methods=['GET', 'POST'])
+@app.route('/registration/', methods=['GET', 'POST'])
+def registration():
+    if session.get('user_id'):
+        return redirect(url_for('home'))
+    if request.method == 'POST':
+        user_login = request.form.get('user_login').lower()
+        user_password = request.form.get('password')
+        conf_password = request.form.get('conf_password')
+        full_name = request.form.get('fullname')
+        user_email = request.form.get('email')
+
+        if user_password != conf_password:
+            flash(msg.PASSWORD_MATCH_ERR, category='warning')
+            return redirect(url_for('registration'))
+
+        user = db.db_session.query(User).filter_by(login=user_login).first()
+        if user:
+            flash(msg.USERNAME_ERR, category='warning')
+            return redirect(url_for('registration'))
+        try:
+            new_user = User(login=user_login, password=user_password,
+                            name=full_name, email=user_email)
+            db.db_session.add(new_user)
+            db.db_session.commit()
+            return redirect(url_for('login'))
+        except Exception as err:
+            flash(msg.REGISTRATION_ERR, category='danger')
+            print(f'Registration error:\n{err}')
+            return redirect(url_for('home'))
+    return render_template('registration.html', title='Registration')
 
 
 @app.route('/vacancies', methods=['GET', 'POST'])
@@ -32,8 +100,13 @@ def vacancies():
     Returns:
         list - list of dictionaries of vacancies
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
+
     if request.method == 'POST':
         if request.form.get('position_name', '').strip() == '':
             flash(msg.POPULATION_ERR.format(field='Position name'), category='danger')
@@ -70,7 +143,7 @@ def vacancies():
                                comment=comment,
                                url=url,
                                status=1,
-                               user_id=1
+                               user_id=user_id
                                )
         try:
             db.db_session.add(vacancy_data)
@@ -78,7 +151,7 @@ def vacancies():
         except Exception as err:
             print(f'Vacancy adding error:\n{err}')
 
-    all_vacancies = db.db_session.query(Vacancy).order_by(-Vacancy.id).all()
+    all_vacancies = db.db_session.query(Vacancy).filter_by(user_id=user_id).order_by(-Vacancy.id).all()
     return render_template('vacancies.html',
                            title='All vacancies',
                            vacancies=all_vacancies)
@@ -94,6 +167,10 @@ def vacancy(vacancy_id):
     Returns:
         dict - data of specific vacancy
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
 
@@ -116,8 +193,8 @@ def vacancy(vacancy_id):
         contact_id = request.form.get('_id')
 
         new_contact_id = contact.insert_record(name=contact_name,
-                                            email=contact_email,
-                                            phone=contact_phone)
+                                               email=contact_email,
+                                               phone=contact_phone)
 
         position_name = request.form.get('position_name')
         company = request.form.get('company')
@@ -131,7 +208,7 @@ def vacancy(vacancy_id):
             contact_ids = ',' + str(new_contact_id)
 
         try:
-            vacancy_to_upd = db.db_session.query(Vacancy).get(vacancy_id)
+            vacancy_to_upd = db.db_session.query(Vacancy).filter_by(user_id=user_id).get(vacancy_id)
             vacancy_to_upd.position_name = position_name
             vacancy_to_upd.company = company
             vacancy_to_upd.description = description
@@ -140,11 +217,6 @@ def vacancy(vacancy_id):
             vacancy_to_upd.url = url
             vacancy_to_upd.status = status
             db.db_session.commit()
-            # if vacancy_to_upd.contacts_ids:
-            #     contacts_to_upt = vacancy_to_upd.contacts_ids.split(',')
-            #     contact.update_record(contacts_to_upt)
-            print('vacancy_to_upd.contacts_ids = ', vacancy_to_upd.contacts_ids)
-            print('type: ',type(vacancy_to_upd.contacts_ids))
         except Exception as err:
             print(f'Vacancy updating error:\n{err}')
 
@@ -152,7 +224,13 @@ def vacancy(vacancy_id):
                         pop_server='pop.gmail.com', pop_port=995,
                         imap_server='imap.gmail.com', imap_port=993,
                         smtp_server='smtp.gmail.com', smtp_port=465)
-    specific_vacancy = db.db_session.query(Vacancy).filter_by(id=vacancy_id).first()
+    specific_vacancy = db.db_session.query(Vacancy).\
+        filter_by(id=vacancy_id).\
+        filter_by(user_id=user_id).first()
+
+    if not specific_vacancy:
+        return Response(status=404)
+
     contact_ids = str(specific_vacancy.contacts_ids).split(',')
     vacancy_contacts = contact.select(contact_ids)
     emails = dict(reversed(list(mail.get_mail_by_pop().items())))
@@ -163,11 +241,21 @@ def vacancy(vacancy_id):
                            emails=emails)
 
 
+
 @app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>', methods=['POST'])
 @app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>/', methods=['POST'])
 def contact_update(vacancy_id, _id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    updated_data = request.form.items()
+    try:
+        updated_data = dict(updated_data)
+    except Exception as err:
+        print(err)
+
     contact = MongoDatabase('contacts_db', 'contacts')
-    contact.update_record(_id, new_data=request.form.items())
+    contact.update_record(_id, new_data=updated_data)
     return redirect(url_for('vacancy', vacancy_id=vacancy_id))
 
 
@@ -181,6 +269,10 @@ def vacancy_events(vacancy_id):
     Returns:
         list - list of events
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
@@ -204,7 +296,9 @@ def vacancy_events(vacancy_id):
         except Exception as err:
             print(f'Event adding error:\n{err}')
 
-    vacancy_name = db.db_session.query(Vacancy).filter_by(id=vacancy_id).first().position_name
+    vacancy_name = db.db_session.query(Vacancy).\
+        filter_by(id=vacancy_id).\
+        filter_by(user_id=user_id).first().position_name
     events = db.db_session.query(Event).filter_by(vacancy_id=vacancy_id).order_by(-Event.id).all()
 
     return render_template('events.html',
@@ -223,6 +317,9 @@ def vacancy_event(vacancy_id, event_id):
     Returns:
         dict - dictionary of event's data
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
@@ -264,6 +361,9 @@ def vacancy_history(vacancy_id):
     Returns:
         list - list of vacancy's history dictionaries
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
     history = data.History(vacancy_id).get_history
     return render_template('history.html',
                            title=f'History of vacancy {vacancy_id}',
@@ -277,6 +377,10 @@ def user_menu():
     Returns:
         list - list of user's data dictionary
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
     user_data = ''
@@ -285,10 +389,10 @@ def user_menu():
     email_cred = ''
 
     try:
-        user_data = db.db_session.query(User).first()
+        user_data = db.db_session.query(User).filter_by(id=user_id).first()
         documents = db.db_session.query(Document).all()
-        templates = db.db_session.query(Template).all()
-        email_cred = db.db_session.query(EmailCredential).first()
+        templates = db.db_session.query(Template).filter_by(user_id=user_id).all()
+        email_cred = db.db_session.query(EmailCredential).filter_by(user_id=user_id).first()
     except Exception as err:
         print(f'User data loading error:\n{err}')
 
@@ -302,6 +406,10 @@ def user_menu():
 
 @app.route('/user/calendar', methods=['GET'])
 def user_calendar():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     return 'User calendar'
 
 
@@ -311,6 +419,10 @@ def user_mail():
     Send mail to recipient
     Returns: redirection to page of 'vacancies'
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
@@ -325,7 +437,7 @@ def user_mail():
         recipient = request.form.get('recipient')
         subject = request.form.get('subject')
         message = request.form.get('message')
-        creds_id = db.db_session.query(EmailCredential).filter_by(user_id=1).first()
+        creds_id = db.db_session.query(EmailCredential).filter_by(user_id=user_id).first()
 
         async_send_mail.apply_async(args=[creds_id.id, recipient, subject, message])
         return redirect(url_for('vacancies'))
@@ -340,6 +452,10 @@ def user_settings():
     Returns:
         tuples - User, Document, Template data
     """
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
+
     if not db.init_db():
         flash(msg.CONNECTION_ERR, category="danger")
     if request.method == 'POST':
@@ -360,7 +476,7 @@ def user_settings():
             return redirect(url_for('user_settings'))
 
         user_name = request.form.get('user_name')
-        login = request.form.get('login')
+        user_login = request.form.get('login')
         passwd = request.form.get('passwd')
         email = request.form.get('email')
 
@@ -386,42 +502,42 @@ def user_settings():
         smtp_server = request.form.get('smtp_server')
 
         try:
-            user_to_upd = db.db_session.query(User).first()
+            user_to_upd = db.db_session.query(User).filter_by(id=user_id).first()
             if user_to_upd:
                 user_to_upd.name = user_name
-                user_to_upd.login = login
+                user_to_upd.login = user_login
                 user_to_upd.passwd = passwd
                 user_to_upd.email = email
             else:
                 new_user = User(name=user_name,
-                                login=login,
+                                login=user_login,
                                 password=passwd,
                                 email=email)
                 db.db_session.add(new_user)
                 db.db_session.commit()
-            email_cred_to_upd = db.db_session.query(EmailCredential).first()
+            email_cred_to_upd = db.db_session.query(EmailCredential).filter_by(user_id=user_id).first()
             if email_cred_to_upd:
                 email_cred_to_upd.email_login = email_login
                 email_cred_to_upd.email_passwd = email_passwd
                 email_cred_to_upd.pop_server = pop_server
                 email_cred_to_upd.smtp_server = smtp_server
-                email_cred_to_upd.user_id = 1
+                email_cred_to_upd.user_id = user_id
             else:
                 new_email_cred = EmailCredential(email_login=email_login,
                                                  email_passwd=email_passwd,
                                                  pop_server=pop_server,
                                                  smtp_server=smtp_server,
-                                                 user_id=1)
+                                                 user_id=user_id)
                 db.db_session.add(new_email_cred)
                 db.db_session.commit()
             return redirect(url_for('user_menu'))
         except Exception as err:
             print(err)
 
-    user_data = db.db_session.query(User).first()
-    email_cred = db.db_session.query(EmailCredential).first()
+    user_data = db.db_session.query(User).filter_by(id=user_id).first()
+    email_cred = db.db_session.query(EmailCredential).filter_by(user_id=user_id).first()
     documents = db.db_session.query(Document).all()
-    templates = db.db_session.query(Template).all()
+    templates = db.db_session.query(Template).filter_by(user_id=user_id).all()
     return render_template('user-settings.html',
                            title='User menu',
                            user_data=user_data,
@@ -437,29 +553,37 @@ def user_documents():
 
 @app.route('/user/templates', methods=['GET', 'POST'])
 def user_templates():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+    user_id = session.get('user_id')
     return 'User templates'
 
 
 @app.route('/vacancy/<int:vacancy_id>/contacts', methods=['GET', 'POST'])
 def add_contact(vacancy_id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         name = request.form.get('name')
         mail = request.form.get('email')
         phone = request.form.get('phone')
 
-        print(name, mail, phone)
     return redirect(url_for('vacancy', vacancy_id=vacancy_id))
 
 
 @app.route('/vacancy/<int:vacancy_id>/contact/<string:contact_id>', methods=['GET', 'POST'])
 def edit_contact(vacancy_id, contact_id):
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
     if request.method == 'POST':
         if contact_id:
             for _ in request.form.get('contact_id'):
                 name = request.form.get('name')
                 mail = request.form.get('email')
                 phone = request.form.get('phone')
-                print(name, mail, phone)
+
     return redirect(url_for('vacancy', vacancy_id=vacancy_id))
 
 

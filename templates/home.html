@@ -4,5 +4,12 @@
 {% endblock %}
 
 {% block body %}
-    <h1>Welcome to Vacancies CRM</h1>
+    {% if session.get('user_name') %}
+        <h1>Hello, {{session.get('user_name')}}! <br>
+        Welcome to Vacancies CRM</h1>
+    {% else %}
+        <h1>Hello!<br>
+        Welcome to Vacancies CRM</h1>
+    {% endif %}
+
 {% endblock %}

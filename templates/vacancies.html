@@ -24,14 +24,13 @@
             <p>*<textarea name="description" placeholder="Description" required></textarea></p>
             <label for="contacts">Contacts: </label>
               <ul id="contacts">
-                <li><input type="text" name="contact_name" placeholder="Contact name"></li>
-                <li><input type="email" name="contact_email" placeholder="Contact Email"></li>
-                <li><input type="text" name="contact_phone" placeholder="Phone number">
-                <li><button onclick="add_new_contact()">Add new field</button></li>
-                <li id="new_contact_field">
-                    <input type="text" name="new_contact_field" placeholder="Contact type (e.g Phone2)">
-                    <input type="text" name="contact_phone" placeholder="Contact value"></li>
+                <li>Name: <input type="text" name="contact_name" placeholder="Contact name"></li>
+                <li>Email: <input type="email" name="contact_email" placeholder="Contact Email"></li>
+                <li>Phone: <input type="text" name="contact_phone" placeholder="Phone number"></li>
+                <div id="new_field">
+                </div>
               </ul>
+            <input type="button" id='addfields' onclick="addNewField()" value="Add new field">
             <p><textarea name="comment" placeholder="Your comment"></textarea></p>
             <p><input type="text" name="url" placeholder="Vacancy URL"></p>
             <p><input type="submit" name="add_vacancy" value="Add vacancy" placeholder="Add new vacancy">
@@ -63,4 +62,23 @@
         document.getElementById('new_contact_field').style.display = 'block'
     }
     </script>
+
+<script>
+    function addNewField() {
+        var li = document.createElement('li'),
+            newField = document.createElement('input', 'type=text');
+        let fieldName = prompt('Specify new contact position', 'e.g. Phone2');
+        newField.placeholder = 'Specify value';
+        newField.id = fieldName;
+        newField.name = fieldName;
+        var newLabel = document.createElement('label');
+        newLabel.for = newField.id;
+        newLabel.innerHTML = fieldName+':\u00A0'
+        li.appendChild(newLabel);
+        li.appendChild(newField);
+        document.getElementById('new_field').appendChild(li)
+    }
+
+</script>
+
 {% endblock %}

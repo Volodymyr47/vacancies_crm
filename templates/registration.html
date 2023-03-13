@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{title}}
+{% endblock %}
+
+{% block body %}
+<h1>{{title}}</h1>
+
+<div class="container" style="width: 300px; margin-top: 10px">
+<form action="/registration" class="form-signin" method="POST">
+
+ {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <p style="color: red">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+ {% endwith %}
+
+  <div class="form-outline mb-2">
+    <label class="form-label" for="user_login">Login:</label>
+    <input type="text" class="form-control" id="user_login" name="user_login" required>
+  </div>
+  <div class="form-outline mb-2">
+    <label class="form-label" for="fullname">Full Name:</label>
+    <input type="text" id="fullname" name="fullname" class="form-control" required>
+  </div>
+  <div class="form-outline mb-2">
+    <label class="form-label" for="email">Email:</label>
+    <input type="email" id="email" name="email" class="form-control"required>
+  </div>
+  <div class="form-outline mb-2">
+    <label class="form-label" for="password">Password:</label>
+    <input type="password" id="password" name="password" class="form-control"required>
+  </div>
+  <div class="form-outline mb-2">
+    <label class="form-label" for="conf_password">Confirm Password:</label>
+    <input type="password" id="conf_password" name="conf_password" class="form-control"required>
+  </div>
+
+  <button type="submit" class="btn btn-primary btn-block mt-3">Sign up</button>
+
+</form>
+</div>
+{% endblock %}
