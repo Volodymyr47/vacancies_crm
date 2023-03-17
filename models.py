@@ -56,6 +56,13 @@ class EmailCredential(Base):
                 'smtp_port': self.smtp_port
                 }
 
+    def get_pop_mandatory_fields(self):
+        return {'login': self.email_login,
+                'password': self.email_passwd,
+                'pop_server': self.pop_server,
+                'pop_port': self.pop_port
+                }
+
 
 class Vacancy(Base):
     __tablename__ = 'vacancy'

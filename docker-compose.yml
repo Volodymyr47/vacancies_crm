@@ -9,7 +9,6 @@ services:
       DATABASE_URL: "postgresql://postgres:mysecretpassword@postgres:5432/vacanciesdb"
       MONGO_HOST: "mongodb"
       RABBIT_HOST: "rabbit_host"
-      EMAIL_PASSWORD: "hhcfdwbcqsteczok"
     hostname: "web"
 
   celery_worker:

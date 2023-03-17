@@ -3,7 +3,7 @@ from imaplib import IMAP4_SSL
 from email.parser import Parser
 from email.header import decode_header
 from mongodb import MongoDatabase
-from models import Vacancy
+from models import Vacancy, EmailCredential
 import email
 import poplib
 import postgresdb as db
@@ -19,14 +19,13 @@ class EmailWrapper:
                  imap_server=None, imap_port=993,
                  smtp_server=None, smtp_port=465
                  ):
-        self.login = login,
-        self.passwd = password,
-        # self.email = email,
-        self.pop_server = pop_server,
-        self.pop_port = pop_port,
-        self.imap_server = imap_server,
-        self.imap_port = imap_port,
-        self.smtp_server = smtp_server,
+        self.login = login
+        self.passwd = password
+        self.pop_server = pop_server
+        self.pop_port = pop_port
+        self.imap_server = imap_server
+        self.imap_port = imap_port
+        self.smtp_server = smtp_server
         self.smtp_port = smtp_port
 
     @staticmethod
@@ -36,21 +35,14 @@ class EmailWrapper:
             value = value.decode(charset)
         return value
 
-    def get_mail_by_pop(self, email_from=None, msg_type='html'):
-        # db.init_db()
-        # email_ids_set = db.db_session.query(Vacancy.contacts_ids).filter(Vacancy.contacts_ids.isnot(None)).all()
-        # email_ids = []
-        # for e_id in email_ids_set:
-        #     if len(e_id[0]) > 0:
-        #         email_ids.append(e_id[0])
-        # print('email_ids=',email_ids)
-        # contacts = MongoDatabase('contacts_db', 'contacts')
-        # contacts.select()
+    def get_mail_by_pop(self, msg_type='html'):
+
         result = {}
-        pop_serv = poplib.POP3_SSL(self.pop_server[0])
-        pop_serv.port = 995
-        pop_serv.user(self.login[0])
-        pop_serv.pass_(self.passwd[0])
+
+        pop_serv = poplib.POP3_SSL(self.pop_server)
+        pop_serv.port = self.pop_port
+        pop_serv.user(self.login)
+        pop_serv.pass_(self.passwd)
 
         number_of_msg = len(pop_serv.list()[1])
 
@@ -101,8 +93,8 @@ class EmailWrapper:
         return result
 
     def get_mail_by_imap(self):
-        imap_server = IMAP4_SSL(self.imap_server[0])
-        imap_server.login(self.login[0], self.passwd[0])
+        imap_server = IMAP4_SSL(self.imap_server)
+        imap_server.login(self.login, self.passwd)
         imap_server.select('inbox')
 
         typ, data = imap_server.search(None, 'ALL')
@@ -118,6 +110,6 @@ class EmailWrapper:
         msg['From'] = self.login
         msg['Subject'] = subject
         msg.set_content(message)
-        with SMTP_SSL(self.smtp_server[0], self.smtp_port) as smtp:
-            smtp.login(self.login[0], self.passwd[0])
+        with SMTP_SSL(self.smtp_server, self.smtp_port) as smtp:
+            smtp.login(self.login, self.passwd)
             smtp.send_message(msg)

@@ -2,7 +2,6 @@ from flask import Flask, flash
 from flask import render_template, request, redirect, url_for
 from flask import session
 from flask import Response
-import os
 
 import data
 import constant_message as msg
@@ -30,6 +29,10 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 @app.route('/login/', methods=['GET', 'POST'])
 def login():
+    """
+    User login function
+    Returns: redirection to home-page if having login success or login-page if received login-error
+    """
     if request.method == 'POST':
         user_login = request.form.get('user_login').lower()
         user_password = request.form.get('password')
@@ -52,6 +55,10 @@ def login():
 @app.route('/logout')
 @app.route('/logout/')
 def logout():
+    """
+    User-logout function
+    Returns: redirection to home-page
+    """
     if not session.get('user_id'):
         return redirect(url_for('login'))
     session.pop('user_id')
@@ -62,6 +69,12 @@ def logout():
 @app.route('/registration', methods=['GET', 'POST'])
 @app.route('/registration/', methods=['GET', 'POST'])
 def registration():
+    """
+    User-registration function
+    Returns: redirection to home-page if having registration success
+    or registration-page if received login-error
+
+    """
     if session.get('user_id'):
         return redirect(url_for('home'))
     if request.method == 'POST':
@@ -190,7 +203,6 @@ def vacancy(vacancy_id):
         contact_name = request.form.get('contact_name')
         contact_email = request.form.get('contact_email')
         contact_phone = request.form.get('contact_phone')
-        contact_id = request.form.get('_id')
 
         new_contact_id = contact.insert_record(name=contact_name,
                                                email=contact_email,
@@ -220,10 +232,8 @@ def vacancy(vacancy_id):
         except Exception as err:
             print(f'Vacancy updating error:\n{err}')
 
-    mail = EmailWrapper(login='volodymyr.di@gmail.com', password=os.environ.get('EMAIL_PASSWORD'),
-                        pop_server='pop.gmail.com', pop_port=995,
-                        imap_server='imap.gmail.com', imap_port=993,
-                        smtp_server='smtp.gmail.com', smtp_port=465)
+    user_cred = db.db_session.query(EmailCredential).filter_by(user_id=user_id).first()
+    mail = EmailWrapper(**user_cred.get_pop_mandatory_fields())
     specific_vacancy = db.db_session.query(Vacancy).\
         filter_by(id=vacancy_id).\
         filter_by(user_id=user_id).first()
@@ -241,10 +251,17 @@ def vacancy(vacancy_id):
                            emails=emails)
 
 
-
 @app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>', methods=['POST'])
 @app.route('/vacancy/<int:vacancy_id>/contact/<string:_id>/', methods=['POST'])
 def contact_update(vacancy_id, _id):
+    """
+    Update existing contact
+    Args:
+        vacancy_id: int
+        _id: string
+
+    Returns: redirect to vacancy form
+    """
     if not session.get('user_id'):
         return redirect(url_for('login'))
 
@@ -557,34 +574,6 @@ def user_templates():
         return redirect(url_for('login'))
     user_id = session.get('user_id')
     return 'User templates'
-
-
-@app.route('/vacancy/<int:vacancy_id>/contacts', methods=['GET', 'POST'])
-def add_contact(vacancy_id):
-    if not session.get('user_id'):
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        name = request.form.get('name')
-        mail = request.form.get('email')
-        phone = request.form.get('phone')
-
-    return redirect(url_for('vacancy', vacancy_id=vacancy_id))
-
-
-@app.route('/vacancy/<int:vacancy_id>/contact/<string:contact_id>', methods=['GET', 'POST'])
-def edit_contact(vacancy_id, contact_id):
-    if not session.get('user_id'):
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        if contact_id:
-            for _ in request.form.get('contact_id'):
-                name = request.form.get('name')
-                mail = request.form.get('email')
-                phone = request.form.get('phone')
-
-    return redirect(url_for('vacancy', vacancy_id=vacancy_id))
 
 
 if __name__ == '__main__':
